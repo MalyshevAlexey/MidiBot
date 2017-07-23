@@ -11,7 +11,6 @@ namespace MidiBot.MidiLib
 
     public class Midi
     {
-        
         private int inHandle;
         private int outHandle;
         internal const int CALLBACK_FUNCTION = 0x00030000;

@@ -1,9 +1,3 @@
 .vs
-MidiBot/bin
-MidiBot/obj
-Libs/MidiLib/bin
-Libs/MidiLib/obj
-Shared/DTO/bin
-Shared/DTO/obj
-Shared/Interfaces/obj
-Shared/Interfaces/bin
+[Bb]in/
+[Oo]bj/

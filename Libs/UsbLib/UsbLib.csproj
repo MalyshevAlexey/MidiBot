@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4334B5C7-E0E8-45AC-8D30-ECAF8AB42117}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>MidiBot</RootNamespace>
-    <AssemblyName>MidiBot</AssemblyName>
+    <ProjectGuid>{1C31ED3F-24E6-4419-832A-0CE658CA4A85}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MidiBot.UsbLib</RootNamespace>
+    <AssemblyName>UsbLib</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -31,25 +31,21 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <Compile Include="Bulk.cs" />
+    <Compile Include="Usb.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Reference Include="LibUsbDotNet, Version=2.2.8.104, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\LibUsbDotNet.2.2.8\lib\LibUsbDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Libs\MidiLib\MidiLib.csproj">
-      <Project>{55bcd6cf-3a09-4381-833a-f9f2abac5bfb}</Project>
-      <Name>MidiLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Libs\UsbCppLib\UsbCppLib.vcxproj">
-      <Project>{7d7d771a-d1ab-4909-8236-e8df38adbd07}</Project>
-      <Name>UsbCppLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Libs\UsbLib\UsbLib.csproj">
-      <Project>{1c31ed3f-24e6-4419-832a-0ce658ca4a85}</Project>
-      <Name>UsbLib</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
