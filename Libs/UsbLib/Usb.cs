@@ -54,6 +54,11 @@ namespace MidiBot.UsbLib
             g.Clear(Color.White);
             g.Flush();
             
+
+
+
+
+
             byte[] data = default(byte[]);
             using (System.IO.MemoryStream sampleStream = new System.IO.MemoryStream())
             {
