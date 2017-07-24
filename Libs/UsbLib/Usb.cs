@@ -53,38 +53,61 @@ namespace MidiBot.UsbLib
             Pen pen = new Pen(Color.DarkRed);
             g.Clear(Color.White);
             g.Flush();
-            
 
-
-
-
-
-            byte[] data = default(byte[]);
-            using (System.IO.MemoryStream sampleStream = new System.IO.MemoryStream())
+            for (int y = 0; y < PUSH2_DISPLAY_HEIGHT; y++)
             {
+                byte[] data = new byte[2048];
+                int b = 0;
+                for (int x = 0; x < PUSH2_DISPLAY_WIDTH; x++)
+                {
+                    Color pixel = bmp.GetPixel(x, y);
+                    int pixel_r = (pixel.R & 0xF8) >> 3;
+                    int pixel_g = (pixel.G & 0xFC) >> 2;
+                    int pixel_b = (pixel.B & 0xF8) >> 3;
+                    int pixel565 = pixel_r + (pixel_g << 5) + (pixel_b << 11);
+                    data[b++] = (byte)(pixel565 & 255); //maybe swap
+                    data[b++] = (byte)(pixel565 >> 8);  //maybe swap
+                }
 
-                //save to stream.
-
-                bmp.Save(sampleStream, System.Drawing.Imaging.ImageFormat.Bmp);
-
-                //the byte array
-
-                data = sampleStream.ToArray();
+                for (int i = 0; i < data.Length; i += 4)
+                {
+                    data[i + 0] ^= 0xE7;
+                    data[i + 1] ^= 0xF3;
+                    data[i + 2] ^= 0xE7;
+                    data[i + 3] ^= 0xFF;
+                }
 
             }
-            ErrorCode ec = ErrorCode.None;
-            UsbDevice device;
-            device = UsbDevice.OpenUsbDevice(new UsbDeviceFinder(ABLETON_VENDOR_ID, PUSH2_PRODUCT_ID));
-            Console.WriteLine(device.UsbRegistryInfo.FullName);
-            UsbEndpointWriter writer = device.OpenEndpointWriter(WriteEndpointID.Ep01);
-            int bytesWritten;
 
-            ec = writer.Write(frame_header, PUSH2_TRANSFER_TIMEOUT, out bytesWritten);
-            Console.WriteLine(bytesWritten);
-            ec = writer.Write(data, PUSH2_TRANSFER_TIMEOUT, out bytesWritten);
-            Console.WriteLine(bytesWritten);
-            Console.WriteLine(ec);
-            UsbDevice.Exit();
+
+
+
+            //byte[] data = default(byte[]);
+            //using (System.IO.MemoryStream sampleStream = new System.IO.MemoryStream())
+            //{
+
+            //    //save to stream.
+
+            //    bmp.Save(sampleStream, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            //    //the byte array
+
+            //    data = sampleStream.ToArray();
+
+            //}
+            //ErrorCode ec = ErrorCode.None;
+            //UsbDevice device;
+            //device = UsbDevice.OpenUsbDevice(new UsbDeviceFinder(ABLETON_VENDOR_ID, PUSH2_PRODUCT_ID));
+            //Console.WriteLine(device.UsbRegistryInfo.FullName);
+            //UsbEndpointWriter writer = device.OpenEndpointWriter(WriteEndpointID.Ep01);
+            //int bytesWritten;
+
+            //ec = writer.Write(frame_header, PUSH2_TRANSFER_TIMEOUT, out bytesWritten);
+            //Console.WriteLine(bytesWritten);
+            //ec = writer.Write(data, PUSH2_TRANSFER_TIMEOUT, out bytesWritten);
+            //Console.WriteLine(bytesWritten);
+            //Console.WriteLine(ec);
+            //UsbDevice.Exit();
 
 
             //int transferred;
