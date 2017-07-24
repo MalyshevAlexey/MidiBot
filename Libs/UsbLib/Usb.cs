@@ -10,6 +10,7 @@ using MonoLibUsb;
 using MonoLibUsb.Transfer;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading;
 
 namespace MidiBot.UsbLib
 {
@@ -36,7 +37,7 @@ namespace MidiBot.UsbLib
 
         const int PUSH2_DISPLAY_FRAMERATE = 60;
 
-        byte[] frame_header = 
+        byte[] frame_header =
         {
             0xff, 0xcc, 0xaa, 0x88,
             0x00, 0x00, 0x00, 0x00,
@@ -44,104 +45,103 @@ namespace MidiBot.UsbLib
             0x00, 0x00, 0x00, 0x00
         };
 
+        Bitmap bmp;
+        Graphics g;
+        Pen pen;
+        object locker = new object();
+
         public Usb ()
         {
             
-            Graphics g;
-            Bitmap bmp = new Bitmap(PUSH2_DISPLAY_WIDTH, PUSH2_DISPLAY_HEIGHT, PixelFormat.Format16bppRgb565);
+            bmp = new Bitmap(PUSH2_DISPLAY_WIDTH, PUSH2_DISPLAY_HEIGHT);
             g = Graphics.FromImage(bmp);
-            Pen pen = new Pen(Color.DarkRed);
+            pen = new Pen(Color.DarkRed);
             g.Clear(Color.White);
             g.Flush();
-
-            for (int y = 0; y < PUSH2_DISPLAY_HEIGHT; y++)
+            Thread display = new Thread(Display);
+            display.IsBackground = true;
+            display.Start();
+            int total = 180;
+            for (float coef = 1; coef < 1800; coef += 0.02f)
             {
-                byte[] data = new byte[2048];
-                int b = 0;
-                for (int x = 0; x < PUSH2_DISPLAY_WIDTH; x++)
+                lock (locker)
                 {
-                    Color pixel = bmp.GetPixel(x, y);
-                    int pixel_r = (pixel.R & 0xF8) >> 3;
-                    int pixel_g = (pixel.G & 0xFC) >> 2;
-                    int pixel_b = (pixel.B & 0xF8) >> 3;
-                    int pixel565 = pixel_r + (pixel_g << 5) + (pixel_b << 11);
-                    data[b++] = (byte)(pixel565 & 255); //maybe swap
-                    data[b++] = (byte)(pixel565 >> 8);  //maybe swap
+                    g.Clear(Color.White);
+                    for (int n = 0; n < total; n++)
+                        ArcLine(n * 2, n * 2 * coef);
+                    g.Flush();
                 }
-
-                for (int i = 0; i < data.Length; i += 4)
-                {
-                    data[i + 0] ^= 0xE7;
-                    data[i + 1] ^= 0xF3;
-                    data[i + 2] ^= 0xE7;
-                    data[i + 3] ^= 0xFF;
-                }
-
+                Thread.Sleep(1);
             }
-
-
-
-
-            //byte[] data = default(byte[]);
-            //using (System.IO.MemoryStream sampleStream = new System.IO.MemoryStream())
-            //{
-
-            //    //save to stream.
-
-            //    bmp.Save(sampleStream, System.Drawing.Imaging.ImageFormat.Bmp);
-
-            //    //the byte array
-
-            //    data = sampleStream.ToArray();
-
-            //}
-            //ErrorCode ec = ErrorCode.None;
-            //UsbDevice device;
-            //device = UsbDevice.OpenUsbDevice(new UsbDeviceFinder(ABLETON_VENDOR_ID, PUSH2_PRODUCT_ID));
-            //Console.WriteLine(device.UsbRegistryInfo.FullName);
-            //UsbEndpointWriter writer = device.OpenEndpointWriter(WriteEndpointID.Ep01);
-            //int bytesWritten;
-
-            //ec = writer.Write(frame_header, PUSH2_TRANSFER_TIMEOUT, out bytesWritten);
-            //Console.WriteLine(bytesWritten);
-            //ec = writer.Write(data, PUSH2_TRANSFER_TIMEOUT, out bytesWritten);
-            //Console.WriteLine(bytesWritten);
-            //Console.WriteLine(ec);
-            //UsbDevice.Exit();
-
-
-            //int transferred;
-            //MonoUsbTransfer transfer = new MonoUsbTransfer(0);
-            //MonoUsbSessionHandle sessionHandle = new MonoUsbSessionHandle();
-            //if (sessionHandle.IsInvalid) throw new Exception("Invalid session handle.");
-            //MonoUsbDeviceHandle device_handle = null;
-            //device_handle = MonoUsbApi.OpenDeviceWithVidPid(sessionHandle, ABLETON_VENDOR_ID, PUSH2_PRODUCT_ID);
-            //if ((device_handle == null) || device_handle.IsInvalid) throw new Exception("Invalid device handle.");
-            //MonoUsbTransferDelegate monoUsbTransferCallbackDelegate = bulkTransferCB;
-            //IntPtr unmanagedPointer = Marshal.AllocHGlobal(frame_header.Length);
-            //Marshal.Copy(frame_header, 0, unmanagedPointer, frame_header.Length);
-            //transfer.FillBulk
-            //(
-            //    device_handle,
-            //    PUSH2_BULK_EP_OUT,
-            //    unmanagedPointer,
-            //    frame_header.Length,
-            //    monoUsbTransferCallbackDelegate,
-            //    IntPtr.Zero,
-            //    TRANSFER_TIMEOUT
-            //);
-            //Marshal.FreeHGlobal(unmanagedPointer);
-            //transfer.Submit();
-            //transfer.Free();
+        }
+        int zoom = 80;
+        private void ArcLine(float alfa, float beta)
+        {
+            float x1 = zoom + (float)Math.Cos(alfa / 180.0 * Math.PI) * zoom;
+            float y1 = zoom - (float)Math.Sin(alfa / 180.0 * Math.PI) * zoom;
+            float x2 = zoom + (float)Math.Cos(beta / 180.0 * Math.PI) * zoom;
+            float y2 = zoom - (float)Math.Sin(beta / 180.0 * Math.PI) * zoom;
+            g.DrawLine(pen, x1, y1, x2, y2);
         }
 
-        //private void bulkTransferCB(MonoUsbTransfer transfer)
-        //{
-        //    Marshal.WriteInt32(transfer.PtrUserData, 1);
-        //    /* caller interprets results and frees transfer */
-        //}
+        private void Display()
+        {
+            UsbDevice device;
+            device = UsbDevice.OpenUsbDevice(new UsbDeviceFinder(ABLETON_VENDOR_ID, PUSH2_PRODUCT_ID));
+            Console.WriteLine(device.UsbRegistryInfo.FullName);
+            UsbEndpointWriter writer = device.OpenEndpointWriter(WriteEndpointID.Ep01);
+            int bytesWritten;
+            ErrorCode ec = ErrorCode.None;
+            while (true)
+            {
+                
+                byte[] frame = new byte[327680];
+                int count = 0;
+                lock (locker)
+                {
+                    
+                    for (int y = 0; y < 160; y++)
+                    {
+                        byte[] data = new byte[2048];
+                        int b = 0;
+                        for (int x = 0; x < 960; x++)
+                        {
+                            Color pixel = bmp.GetPixel(x, y);
+                            int pixel_r = (pixel.R & 0xF8) >> 3;
+                            int pixel_g = (pixel.G & 0xFC) >> 2;
+                            int pixel_b = (pixel.B & 0xF8) >> 3;
+                            int pixel565 = pixel_r + (pixel_g << 5) + (pixel_b << 11);
+                            data[b++] = (byte)(pixel565 & 255); //maybe swap
+                            data[b++] = (byte)(pixel565 >> 8);  //maybe swap
+                        }
+                        for (int i = 0; i < 1920; i += 4)
+                        {
+                            frame[count++] = data[i + 0] ^= 0xE7;
+                            frame[count++] = data[i + 1] ^= 0xF3;
+                            frame[count++] = data[i + 2] ^= 0xE7;
+                            frame[count++] = data[i + 3] ^= 0xFF;
+                        }
+                        count += 128;
+                    }
+                    
+                }
+                
+                ec = writer.Write(frame_header, 1000, out bytesWritten);
+                //DateTime start = DateTime.Now;
+                ec = writer.Write(frame, 1000, out bytesWritten);
+                
+                //for (int b = 0; b < 640; b++)
+                //{
+                    
+                //    ec = writer.Write(frame.Skip(b * 512).Take(512).ToArray(), 1, out bytesWritten);
+                    
+                //}
+                //TimeSpan finish = DateTime.Now - start;
+                //Console.WriteLine(finish);
 
-
+                //Thread.Sleep(1000 / PUSH2_DISPLAY_FRAMERATE);
+            }
+        }
     }
     //[Flags]
     //public enum DICFG
