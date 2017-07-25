@@ -11,6 +11,7 @@ using MonoLibUsb.Transfer;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
+using System.IO;
 
 namespace MidiBot.UsbLib
 {
@@ -49,11 +50,12 @@ namespace MidiBot.UsbLib
         Graphics g;
         Pen pen;
         object locker = new object();
+        ushort[] xOrMasks = { 0xf3e7, 0xffe7 };
 
         public Usb ()
         {
             
-            bmp = new Bitmap(PUSH2_DISPLAY_WIDTH, PUSH2_DISPLAY_HEIGHT);
+            bmp = new Bitmap(PUSH2_DISPLAY_WIDTH, PUSH2_DISPLAY_HEIGHT, PixelFormat.Format24bppRgb);
             g = Graphics.FromImage(bmp);
             pen = new Pen(Color.DarkRed);
             g.Clear(Color.White);
@@ -71,10 +73,10 @@ namespace MidiBot.UsbLib
                         ArcLine(n * 2, n * 2 * coef);
                     g.Flush();
                 }
-                Thread.Sleep(1);
+                Thread.Sleep(10);
             }
         }
-        int zoom = 80;
+        int zoom = 50;
         private void ArcLine(float alfa, float beta)
         {
             float x1 = zoom + (float)Math.Cos(alfa / 180.0 * Math.PI) * zoom;
@@ -94,50 +96,114 @@ namespace MidiBot.UsbLib
             ErrorCode ec = ErrorCode.None;
             while (true)
             {
-                
+                DateTime start = DateTime.Now;
+
+
+
                 byte[] frame = new byte[327680];
-                int count = 0;
                 lock (locker)
                 {
+                    BitmapData bmpdata = bmp.LockBits(new Rectangle(0, 0, 960, 160), ImageLockMode.ReadOnly, bmp.PixelFormat);
+                    int numbytes = bmpdata.Stride * bmp.Height;
+                    byte[] bytedata = new byte[numbytes];
+                    IntPtr ptr = bmpdata.Scan0;
+                    Marshal.Copy(ptr, bytedata, 0, numbytes);
+                    bmp.UnlockBits(bmpdata);
                     
+                    int count = 0;
                     for (int y = 0; y < 160; y++)
                     {
-                        byte[] data = new byte[2048];
-                        int b = 0;
                         for (int x = 0; x < 960; x++)
                         {
-                            Color pixel = bmp.GetPixel(x, y);
-                            int pixel_r = (pixel.R & 0xF8) >> 3;
-                            int pixel_g = (pixel.G & 0xFC) >> 2;
-                            int pixel_b = (pixel.B & 0xF8) >> 3;
-                            int pixel565 = pixel_r + (pixel_g << 5) + (pixel_b << 11);
-                            data[b++] = (byte)(pixel565 & 255); //maybe swap
-                            data[b++] = (byte)(pixel565 >> 8);  //maybe swap
-                        }
-                        for (int i = 0; i < 1920; i += 4)
-                        {
-                            frame[count++] = data[i + 0] ^= 0xE7;
-                            frame[count++] = data[i + 1] ^= 0xF3;
-                            frame[count++] = data[i + 2] ^= 0xE7;
-                            frame[count++] = data[i + 3] ^= 0xFF;
+                            int next = x + y * 960;
+                            int pixel = bytedata[next++] >> 3;
+                            pixel <<= 6;
+                            pixel += bytedata[next++] >> 2;
+                            pixel <<= 5;
+                            pixel += bytedata[next++] >> 3;
+                            byte[] temp = BitConverter.GetBytes(pixel ^ xOrMasks[x % 2]);
+                            frame[count++] = temp[1];
+                            frame[count++] = temp[0];
                         }
                         count += 128;
                     }
-                    
+
                 }
-                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                //byte[] rawFrame;
+                //byte[] frame = new byte[327680];
+                //int count = 0;
+                //lock (locker)
+                //{
+                //    using (var ms = new MemoryStream())
+                //    {
+                //        bmp.Save(ms, ImageFormat.Bmp);
+                //        rawFrame = ms.ToArray();
+                //    }
+                //    for (int y = 0; y < 160; y++)
+                //    {
+                //        for (int i = 0; i < 1920; i += 4)
+                //        {
+                //            int next = 66 + i + y * 1920;
+                //            frame[count++] = rawFrame[next++] ^= 0xE7;
+                //            frame[count++] = rawFrame[next++] ^= 0xF3;
+                //            frame[count++] = rawFrame[next++] ^= 0xE7;
+                //            frame[count++] = rawFrame[next++] ^= 0xFF;
+                //        }
+                //        count += 128;
+                //    }
+
+
+
+                //    //for (int y = 0; y < 160; y++)
+                //    //{
+                //    //    byte[] data = new byte[2048];
+                //    //    int b = 0;
+                //    //    for (int x = 0; x < 960; x++)
+                //    //    {
+                //    //        Color pixel = bmp.GetPixel(x, y);
+                //    //        int pixel_r = (pixel.R & 0xF8) >> 3;
+                //    //        int pixel_g = (pixel.G & 0xFC) >> 2;
+                //    //        int pixel_b = (pixel.B & 0xF8) >> 3;
+                //    //        int pixel565 = pixel_r + (pixel_g << 5) + (pixel_b << 11);
+                //    //        data[b++] = (byte)(pixel565 & 255); //maybe swap
+                //    //        data[b++] = (byte)(pixel565 >> 8);  //maybe swap
+                //    //    }
+                //    //    for (int i = 0; i < 1920; i += 4)
+                //    //    {
+                //    //        frame[count++] = data[i + 0] ^= 0xE7;
+                //    //        frame[count++] = data[i + 1] ^= 0xF3;
+                //    //        frame[count++] = data[i + 2] ^= 0xE7;
+                //    //        frame[count++] = data[i + 3] ^= 0xFF;
+                //    //    }
+                //    //    count += 128;
+                //    //}
+
+                //}
+                Console.WriteLine(DateTime.Now - start);
                 ec = writer.Write(frame_header, 1000, out bytesWritten);
-                //DateTime start = DateTime.Now;
+                //
                 ec = writer.Write(frame, 1000, out bytesWritten);
-                
+
                 //for (int b = 0; b < 640; b++)
                 //{
-                    
+
                 //    ec = writer.Write(frame.Skip(b * 512).Take(512).ToArray(), 1, out bytesWritten);
-                    
+
                 //}
-                //TimeSpan finish = DateTime.Now - start;
-                //Console.WriteLine(finish);
 
                 //Thread.Sleep(1000 / PUSH2_DISPLAY_FRAMERATE);
             }
