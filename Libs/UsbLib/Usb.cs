@@ -142,6 +142,8 @@ namespace MidiBot.UsbLib
                 //Thread.Sleep(1000 / PUSH2_DISPLAY_FRAMERATE);
             }
         }
+
+        
     }
     //[Flags]
     //public enum DICFG
