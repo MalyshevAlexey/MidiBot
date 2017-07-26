@@ -8,9 +8,10 @@
     <OutputType>Library</OutputType>
     <RootNamespace>MidiBot.Push2</RootNamespace>
     <AssemblyName>Push2</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,9 +36,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Push2Controller.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +45,10 @@
     <ProjectReference Include="..\..\Shared\Interfaces\Interfaces.csproj">
       <Project>{2600f83b-2069-4825-889a-ebbf2e75e4f0}</Project>
       <Name>Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UsbLib\UsbLib.csproj">
+      <Project>{1c31ed3f-24e6-4419-832a-0ce658ca4a85}</Project>
+      <Name>UsbLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

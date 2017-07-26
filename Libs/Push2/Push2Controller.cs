@@ -1,4 +1,5 @@
 ﻿using MidiBot.Interfaces;
+using MidiBot.UsbLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -6,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace MidiBot.Push2
 {
@@ -15,18 +17,79 @@ namespace MidiBot.Push2
         const short PRODUCT_ID = 0x1967;
         const byte BULK_EP_OUT = 0x01;
         const int TRANSFER_TIMEOUT = 1000;
-
         const int DISPLAY_WIDTH = 960;
         const int DISPLAY_HEIGHT = 160;
         const int LINE_BUFFER_SIZE = 2048;
         const int LINE_GUTTER_SIZE = 128;
-        const int MESSAGE_BUFFER_SIZE = 16384;
-        const int IMAGE_BUFFER_SIZE = LINE_BUFFER_SIZE * DISPLAY_HEIGHT;
-        const int MESSAGES_PER_IMAGE = (LINE_BUFFER_SIZE * DISPLAY_HEIGHT) / MESSAGE_BUFFER_SIZE;
+        byte[] frame_header =
+        {
+            0xff, 0xcc, 0xaa, 0x88,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00
+        };
         private readonly ushort[] xOrMasks = { 0xf3e7, 0xffe7 };
         private byte[] frame = new byte[327680];
 
-        private byte[] BmpToArray(ref Bitmap bmp, int width, int height)
+        Bitmap bmp;
+        Graphics g;
+        Pen pen;
+        object locker = new object();
+
+        public Push2Controller()
+        {
+            bmp = new Bitmap(960, 160, PixelFormat.Format24bppRgb);
+            g = Graphics.FromImage(bmp);
+            pen = new Pen(Color.DarkRed);
+            g.Clear(Color.White);
+            g.Flush();
+            Thread display = new Thread(Display);
+            display.IsBackground = true;
+            display.Start();
+            int total = 180;
+            for (float coef = 1; coef < 1800; coef += 0.02f)
+            {
+                lock (locker)
+                {
+                    g.Clear(Color.White);
+                    for (int n = 0; n < total; n++)
+                        ArcLine(n * 2, n * 2 * coef);
+                    g.Flush();
+                }
+                Thread.Sleep(10);
+            }
+        }
+
+        private void Display()
+        {
+            Usb usb = new Usb(VENDOR_ID, PRODUCT_ID);
+            while (true)
+            {
+                lock (locker)
+                    frame = MakeFrame(bmp);
+                DateTime start = DateTime.Now;
+                usb.Write(frame_header, 100);
+                usb.Write(frame, 100);
+                Console.WriteLine(DateTime.Now - start);
+            }
+        }
+
+            int zoom = 80;
+        private void ArcLine(float alfa, float beta)
+        {
+            float x1 = zoom + (float)Math.Cos(alfa / 180.0 * Math.PI) * zoom;
+            float y1 = zoom - (float)Math.Sin(alfa / 180.0 * Math.PI) * zoom;
+            float x2 = zoom + (float)Math.Cos(beta / 180.0 * Math.PI) * zoom;
+            float y2 = zoom - (float)Math.Sin(beta / 180.0 * Math.PI) * zoom;
+            g.DrawLine(pen, x1, y1, x2, y2);
+        }
+
+        private byte[] BitmapToArray(Bitmap bmp)
+        {
+            return BitmapToArray(bmp, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        }
+
+        private byte[] BitmapToArray(Bitmap bmp, int width, int height)
         {
             BitmapData bmpdata = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, bmp.PixelFormat);
             int numbytes = bmpdata.Stride * bmp.Height;
@@ -47,8 +110,9 @@ namespace MidiBot.Push2
             return pixel;       // 5 bytes blue - 6 bytes green - 5 bytes red
         }
 
-        private byte[] MakeFrame(byte[] bytedata)
+        public byte[] MakeFrame(Bitmap bmp)
         {
+            byte[] bytedata = BitmapToArray(bmp);
             int count = 0;
             int next = 0;
             for (int y = 0; y < 160; y++)

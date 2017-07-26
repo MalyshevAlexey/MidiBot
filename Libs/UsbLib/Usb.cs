@@ -18,54 +18,32 @@ namespace MidiBot.UsbLib
 
     public class Usb
     {
-        const int PUSH2_DISPLAY_FRAMERATE = 60;
+        
+        UsbDevice device;
+        UsbEndpointWriter writer;
+        ErrorCode ec;
+        int bytesWritten;
 
-        byte[] frame_header =
+        private void GetDevice (int vid, int pid)
         {
-            0xff, 0xcc, 0xaa, 0x88,
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00
-        };
-
-        Bitmap bmp;
-        Graphics g;
-        Pen pen;
-        object locker = new object();
-        ushort[] xOrMasks = { 0xf3e7, 0xffe7 };
-
-        public Usb ()
-        {
-            
-            //bmp = new Bitmap(PUSH2_DISPLAY_WIDTH, PUSH2_DISPLAY_HEIGHT, PixelFormat.Format24bppRgb);
-            //g = Graphics.FromImage(bmp);
-            //pen = new Pen(Color.DarkRed);
-            //g.Clear(Color.White);
-            //g.Flush();
-            //Thread display = new Thread(Display);
-            //display.IsBackground = true;
-            //display.Start();
-            //int total = 180;
-            //for (float coef = 1; coef < 1800; coef += 0.02f)
-            //{
-            //    lock (locker)
-            //    {
-            //        g.Clear(Color.White);
-            //        for (int n = 0; n < total; n++)
-            //            ArcLine(n * 2, n * 2 * coef);
-            //        g.Flush();
-            //    }
-            //    Thread.Sleep(10);
-            //}
+            device = UsbDevice.OpenUsbDevice(new UsbDeviceFinder(vid, pid));
         }
-        int zoom = 50;
-        private void ArcLine(float alfa, float beta)
+
+        private void GetWriter()
         {
-            float x1 = zoom + (float)Math.Cos(alfa / 180.0 * Math.PI) * zoom;
-            float y1 = zoom - (float)Math.Sin(alfa / 180.0 * Math.PI) * zoom;
-            float x2 = zoom + (float)Math.Cos(beta / 180.0 * Math.PI) * zoom;
-            float y2 = zoom - (float)Math.Sin(beta / 180.0 * Math.PI) * zoom;
-            g.DrawLine(pen, x1, y1, x2, y2);
+            writer = device.OpenEndpointWriter(WriteEndpointID.Ep01);
+        }
+
+        public Usb (int vid, int pid)
+        {
+            ec = ErrorCode.None;
+            GetDevice(vid, pid);
+            GetWriter();
+        }
+        
+        public void Write (byte[] frame, int timeout)
+        {
+            ec = writer.Write(frame, timeout, out bytesWritten);
         }
 
         private void Display()

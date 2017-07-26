@@ -57,9 +57,9 @@
       <Project>{55bcd6cf-3a09-4381-833a-f9f2abac5bfb}</Project>
       <Name>MidiLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Libs\UsbLib\UsbLib.csproj">
-      <Project>{1c31ed3f-24e6-4419-832a-0ce658ca4a85}</Project>
-      <Name>UsbLib</Name>
+    <ProjectReference Include="..\Libs\Push2\Push2.csproj">
+      <Project>{2a896c1f-5286-436f-a2e7-6e929de21602}</Project>
+      <Name>Push2</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
