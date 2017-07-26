@@ -58,6 +58,20 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libs\Push2\Push2\Push2.csproj">
+      <Project>{2a896c1f-5286-436f-a2e7-6e929de21602}</Project>
+      <Name>Push2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libs\UsbLib\UsbLib.csproj">
+      <Project>{1c31ed3f-24e6-4419-832a-0ce658ca4a85}</Project>
+      <Name>UsbLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Shared\Interfaces\Interfaces.csproj">
+      <Project>{2600f83b-2069-4825-889a-ebbf2e75e4f0}</Project>
+      <Name>Interfaces</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

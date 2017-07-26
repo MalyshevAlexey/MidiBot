@@ -18,24 +18,6 @@ namespace MidiBot.UsbLib
 
     public class Usb
     {
-        const short ABLETON_VENDOR_ID = 0x2982;
-        const short PUSH2_PRODUCT_ID = 0x1967;
-        const byte PUSH2_BULK_EP_OUT = 0x01;
-        const int PUSH2_TRANSFER_TIMEOUT = 1000;
-
-        const int PUSH2_DISPLAY_WIDTH = 960;
-        const int PUSH2_DISPLAY_HEIGHT = 160;
-        const int PUSH2_DISPLAY_LINE_BUFFER_SIZE = 2048;
-        const int PUSH2_DISPLAY_LINE_GUTTER_SIZE = 128;
-        const int PUSH2_DISPLAY_MESSAGE_BUFFER_SIZE = 16384;
-        const int PUSH2_DISPLAY_IMAGE_BUFFER_SIZE = PUSH2_DISPLAY_LINE_BUFFER_SIZE * PUSH2_DISPLAY_HEIGHT;
-        const int PUSH2_DISPLAY_MESSAGES_PER_IMAGE = (PUSH2_DISPLAY_LINE_BUFFER_SIZE * PUSH2_DISPLAY_HEIGHT) / PUSH2_DISPLAY_MESSAGE_BUFFER_SIZE;
-
-        const byte PUSH2_DISPLAY_SHAPING_PATTERN_1 = 0xE7;
-        const byte PUSH2_DISPLAY_SHAPING_PATTERN_2 = 0xF3;
-        const byte PUSH2_DISPLAY_SHAPING_PATTERN_3 = 0xE7;
-        const byte PUSH2_DISPLAY_SHAPING_PATTERN_4 = 0xFF;
-
         const int PUSH2_DISPLAY_FRAMERATE = 60;
 
         byte[] frame_header =
@@ -55,26 +37,26 @@ namespace MidiBot.UsbLib
         public Usb ()
         {
             
-            bmp = new Bitmap(PUSH2_DISPLAY_WIDTH, PUSH2_DISPLAY_HEIGHT, PixelFormat.Format24bppRgb);
-            g = Graphics.FromImage(bmp);
-            pen = new Pen(Color.DarkRed);
-            g.Clear(Color.White);
-            g.Flush();
-            Thread display = new Thread(Display);
-            display.IsBackground = true;
-            display.Start();
-            int total = 180;
-            for (float coef = 1; coef < 1800; coef += 0.02f)
-            {
-                lock (locker)
-                {
-                    g.Clear(Color.White);
-                    for (int n = 0; n < total; n++)
-                        ArcLine(n * 2, n * 2 * coef);
-                    g.Flush();
-                }
-                Thread.Sleep(10);
-            }
+            //bmp = new Bitmap(PUSH2_DISPLAY_WIDTH, PUSH2_DISPLAY_HEIGHT, PixelFormat.Format24bppRgb);
+            //g = Graphics.FromImage(bmp);
+            //pen = new Pen(Color.DarkRed);
+            //g.Clear(Color.White);
+            //g.Flush();
+            //Thread display = new Thread(Display);
+            //display.IsBackground = true;
+            //display.Start();
+            //int total = 180;
+            //for (float coef = 1; coef < 1800; coef += 0.02f)
+            //{
+            //    lock (locker)
+            //    {
+            //        g.Clear(Color.White);
+            //        for (int n = 0; n < total; n++)
+            //            ArcLine(n * 2, n * 2 * coef);
+            //        g.Flush();
+            //    }
+            //    Thread.Sleep(10);
+            //}
         }
         int zoom = 50;
         private void ArcLine(float alfa, float beta)
@@ -88,47 +70,47 @@ namespace MidiBot.UsbLib
 
         private void Display()
         {
-            UsbDevice device;
-            device = UsbDevice.OpenUsbDevice(new UsbDeviceFinder(ABLETON_VENDOR_ID, PUSH2_PRODUCT_ID));
-            Console.WriteLine(device.UsbRegistryInfo.FullName);
-            UsbEndpointWriter writer = device.OpenEndpointWriter(WriteEndpointID.Ep01);
-            int bytesWritten;
-            ErrorCode ec = ErrorCode.None;
-            while (true)
-            {
-                DateTime start = DateTime.Now;
+            //UsbDevice device;
+            //device = UsbDevice.OpenUsbDevice(new UsbDeviceFinder(ABLETON_VENDOR_ID, PUSH2_PRODUCT_ID));
+            //Console.WriteLine(device.UsbRegistryInfo.FullName);
+            //UsbEndpointWriter writer = device.OpenEndpointWriter(WriteEndpointID.Ep01);
+            //int bytesWritten;
+            //ErrorCode ec = ErrorCode.None;
+            //while (true)
+            //{
+            //    DateTime start = DateTime.Now;
 
 
 
-                byte[] frame = new byte[327680];
-                lock (locker)
-                {
-                    BitmapData bmpdata = bmp.LockBits(new Rectangle(0, 0, 960, 160), ImageLockMode.ReadOnly, bmp.PixelFormat);
-                    int numbytes = bmpdata.Stride * bmp.Height;
-                    byte[] bytedata = new byte[numbytes];
-                    IntPtr ptr = bmpdata.Scan0;
-                    Marshal.Copy(ptr, bytedata, 0, numbytes);
-                    bmp.UnlockBits(bmpdata);
+            //    byte[] frame = new byte[327680];
+            //    lock (locker)
+            //    {
+            //        BitmapData bmpdata = bmp.LockBits(new Rectangle(0, 0, 960, 160), ImageLockMode.ReadOnly, bmp.PixelFormat);
+            //        int numbytes = bmpdata.Stride * bmp.Height;
+            //        byte[] bytedata = new byte[numbytes];
+            //        IntPtr ptr = bmpdata.Scan0;
+            //        Marshal.Copy(ptr, bytedata, 0, numbytes);
+            //        bmp.UnlockBits(bmpdata);
                     
-                    int count = 0;
-                    for (int y = 0; y < 160; y++)
-                    {
-                        for (int x = 0; x < 960; x++)
-                        {
-                            int next = x + y * 960;
-                            int pixel = bytedata[next++] >> 3;
-                            pixel <<= 6;
-                            pixel += bytedata[next++] >> 2;
-                            pixel <<= 5;
-                            pixel += bytedata[next++] >> 3;
-                            byte[] temp = BitConverter.GetBytes(pixel ^ xOrMasks[x % 2]);
-                            frame[count++] = temp[1];
-                            frame[count++] = temp[0];
-                        }
-                        count += 128;
-                    }
+            //        int count = 0;
+            //        for (int y = 0; y < 160; y++)
+            //        {
+            //            for (int x = 0; x < 960; x++)
+            //            {
+            //                int next = x + y * 960;
+            //                int pixel = bytedata[next++] >> 3;
+            //                pixel <<= 6;
+            //                pixel += bytedata[next++] >> 2;
+            //                pixel <<= 5;
+            //                pixel += bytedata[next++] >> 3;
+            //                byte[] temp = BitConverter.GetBytes(pixel ^ xOrMasks[x % 2]);
+            //                frame[count++] = temp[1];
+            //                frame[count++] = temp[0];
+            //            }
+            //            count += 128;
+            //        }
 
-                }
+            //    }
 
 
 
@@ -193,10 +175,20 @@ namespace MidiBot.UsbLib
                 //    //}
 
                 //}
-                Console.WriteLine(DateTime.Now - start);
-                ec = writer.Write(frame_header, 1000, out bytesWritten);
-                //
-                ec = writer.Write(frame, 1000, out bytesWritten);
+
+
+
+
+
+                //Console.WriteLine(DateTime.Now - start);
+                //ec = writer.Write(frame_header, 1000, out bytesWritten);
+                
+                //ec = writer.Write(frame, 1000, out bytesWritten);
+
+
+
+
+
 
                 //for (int b = 0; b < 640; b++)
                 //{
@@ -206,9 +198,12 @@ namespace MidiBot.UsbLib
                 //}
 
                 //Thread.Sleep(1000 / PUSH2_DISPLAY_FRAMERATE);
-            }
+            //}
         }
 
+        
+
+        
         
     }
     //[Flags]

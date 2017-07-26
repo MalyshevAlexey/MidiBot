@@ -6,6 +6,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Linq;
+using MidiBot.UsbLib;
+using System.Reflection;
+using MidiBot.Push2;
 
 namespace MidiBotTesting
 {
@@ -15,77 +18,104 @@ namespace MidiBotTesting
         Bitmap bmp;
         Graphics g;
         Pen pen;
+        PrivateObject obj;
+        byte[] bytedata;
+        byte[] frame;
         object locker = new object();
         static ushort[] xOrMasks = { 0xf3e7, 0xffe7 };
 
-        [TestMethod]
-        public void TestMethod1()
+        private void Init()
         {
             bmp = new Bitmap(960, 160, PixelFormat.Format24bppRgb);
             g = Graphics.FromImage(bmp);
-            pen = new Pen(Color.Green);
+            pen = new Pen(Color.DarkRed);
             g.Clear(Color.Coral);
             g.Flush();
-            BitmapData bmpdata = bmp.LockBits(new Rectangle(0, 0, 960, 160), ImageLockMode.ReadOnly, bmp.PixelFormat);
-            int numbytes = bmpdata.Stride * bmp.Height;
-            byte[] bytedata = new byte[numbytes];
-            IntPtr ptr = bmpdata.Scan0;
-            Marshal.Copy(ptr, bytedata, 0, numbytes);
-            bmp.UnlockBits(bmpdata);
-            byte[] frame = new byte[327680];
-            int count = 0;
-            for (int y = 0; y < 160; y++)
+            Push2Controller push2 = new Push2Controller();
+            obj = new PrivateObject(push2);
+            bytedata = (byte[])obj.Invoke("BmpToArray", new object[] { bmp, 960, 160 });
+            frame = new byte[327680];
+        }
+
+        [TestMethod]
+        public void PixelCovertTest()
+        {
+            Init();
+            Color pixel = bmp.GetPixel(0, 0);
+            int pixel_r = (pixel.R & 0xF8) >> 3;
+            int pixel_g = (pixel.G & 0xFC) >> 2;
+            int pixel_b = (pixel.B & 0xF8) >> 3;
+            int pixel565 = (pixel_r + (pixel_g << 5) + (pixel_b << 11));
+            int actualPixel = (int)obj.Invoke("PixelConverter", new object[] { bytedata[0], bytedata[1], bytedata[2] });
+            Assert.AreEqual(pixel565, actualPixel);
+        }
+
+        [TestMethod]
+        public void XoringTest()
+        {
+            Init();
+            int pixel565 = 21503;
+            byte upper = (byte)(pixel565 >> 8);
+            byte lower = (byte)(pixel565 & 0xFF);
+            byte upperXor = (byte)(upper ^ 0xF3);
+            byte lowerXor = (byte)(lower ^ 0xE7);
+            int pixel565Xor = (pixel565 ^ 0xF3E7);
+
+            Console.WriteLine(Convert.ToString(pixel565, 2).PadLeft(16, '0'));
+            Console.WriteLine(Convert.ToString((upper << 8) + lower, 2).PadLeft(16, '0'));
+            Console.WriteLine();
+            Assert.AreEqual(pixel565, (upper << 8) + lower);
+
+            Console.WriteLine(Convert.ToString(upper, 2).PadLeft(8, '0'));
+            Console.WriteLine(Convert.ToString(0xF3, 2).PadLeft(8, '0'));
+            Console.WriteLine(Convert.ToString(upperXor, 2).PadLeft(8, '0'));
+            Console.WriteLine();
+
+            Console.WriteLine(Convert.ToString(lower, 2).PadLeft(8, '0'));
+            Console.WriteLine(Convert.ToString(0xE7, 2).PadLeft(8, '0'));
+            Console.WriteLine(Convert.ToString(lowerXor, 2).PadLeft(8, '0'));
+            Console.WriteLine();
+
+            Console.WriteLine(Convert.ToString((upperXor << 8) + lowerXor, 2).PadLeft(16, '0'));
+            Console.WriteLine(Convert.ToString(pixel565Xor, 2).PadLeft(16, '0'));
+            Assert.AreEqual((upperXor << 8) + lowerXor, pixel565Xor);
+        }
+
+        [TestMethod]
+        public void New()
+        {
+            Init();
+            byte[] newFrame = new byte[327680];
+            for (int c = 0; c < 1; c++)
             {
-                for (int x = 0; x < 960; x++)
+                int count = 0;
+                int next = 0;
+                lock (locker)
                 {
-                    int next = x + y * 960;
-                    int pixel = bytedata[next++] >> 3;
-                    pixel <<= 6;
-                    pixel += bytedata[next++] >> 2;
-                    pixel <<= 5;
-                    pixel += bytedata[next++] >> 3;
-                    byte[] temp = BitConverter.GetBytes(pixel ^ xOrMasks[x % 2]);
-                    frame[count++] = temp[0];
-                    frame[count++] = temp[1];
+                    for (int y = 0; y < 160; y++)
+                    {
+                        for (int x = 0; x < 960; x++)
+                        {
+                            int pixel = bytedata[next++] >> 3;
+                            pixel <<= 6;
+                            pixel += bytedata[next++] >> 2;
+                            pixel <<= 5;
+                            pixel += bytedata[next++] >> 3;
+                            int pixelXor = pixel ^ xOrMasks[x % 2];
+                            newFrame[count++] = (byte)(pixelXor & 0xFF);
+                            newFrame[count++] = (byte)(pixelXor >> 8);
+                        }
+                        count += 128;
+                    }
                 }
-                count += 128;
             }
-            //ushort[] frame = new ushort[163840];
-            //DateTime start = DateTime.Now;
-            //for (int c = 0; c < 10; c++)
-            //{
-            //    int count = 0;
-            //    lock (locker)
-            //    {
-            //        for (int y = 0; y < 160; y++)
-            //        {
-            //            for (int x = 0; x < 960; x++)
-            //            {
-            //                Color color = bmp.GetPixel(x, y);
-            //                int pixel = color.B >> 3;
-            //                pixel <<= 6;
-            //                pixel += color.G >> 2;
-            //                pixel <<= 5;
-            //                pixel += color.B >> 3;
-            //                frame[count++] = (ushort)(pixel ^ xOrMasks[x % 2]);
-            //            }
-            //            count += 128 / 2;
-            //        }
-            //    }
-            //}
-            //Console.WriteLine("New: " + (DateTime.Now - start));
         }
 
         [TestMethod]
         public void Old()
         {
-            bmp = new Bitmap(960, 160);
-            g = Graphics.FromImage(bmp);
-            pen = new Pen(Color.DarkRed);
-            g.Clear(Color.Coral);
-            g.Flush();
-            byte[] frame = new byte[327680];
-            for (int c = 0; c < 10; c++)
+            Init();
+            for (int c = 0; c < 1; c++)
             {
                 int count = 0;
                 lock (locker)
@@ -115,6 +145,8 @@ namespace MidiBotTesting
                     }
                 }
             }
+            //byte[] actual = (byte[])obj.Invoke("MakeFrame", new object[] { bytedata });
+            //Assert.AreEqual(frame, actual);
         }
     }
 }
