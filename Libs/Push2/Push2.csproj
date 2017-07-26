@@ -44,7 +44,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared\Interfaces\Interfaces.csproj">
+    <ProjectReference Include="..\..\Shared\Interfaces\Interfaces.csproj">
       <Project>{2600f83b-2069-4825-889a-ebbf2e75e4f0}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>

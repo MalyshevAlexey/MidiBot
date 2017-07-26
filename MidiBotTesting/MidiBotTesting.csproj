@@ -59,7 +59,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Libs\Push2\Push2\Push2.csproj">
+    <ProjectReference Include="..\Libs\Push2\Push2.csproj">
       <Project>{2a896c1f-5286-436f-a2e7-6e929de21602}</Project>
       <Name>Push2</Name>
     </ProjectReference>

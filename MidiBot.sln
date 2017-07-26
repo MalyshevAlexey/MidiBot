@@ -29,7 +29,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsbLib", "Libs\UsbLib\UsbLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiBotTesting", "MidiBotTesting\MidiBotTesting.csproj", "{AE14027A-A577-4ACE-B349-5C7186037C39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Push2", "Libs\Push2\Push2\Push2.csproj", "{2A896C1F-5286-436F-A2E7-6E929DE21602}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Push2", "Libs\Push2\Push2.csproj", "{2A896C1F-5286-436F-A2E7-6E929DE21602}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
