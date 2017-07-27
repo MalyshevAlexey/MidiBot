@@ -11,11 +11,13 @@ namespace MidiBot.MidiLib
 
     public class Midi
     {
+        private static MidiProc midiProc;
         private int inHandle;
         private int outHandle;
         internal const int CALLBACK_FUNCTION = 0x00030000;
         internal const int MIM_DATA = 0x3C3;
         internal const int MIM_LONGDATA = 0x3C4;
+        public Func<int, int> OnShortReceive;
 
         static public void CallBack(int inHandle, int msg, IntPtr instance, int data, int time)
         {
@@ -23,6 +25,8 @@ namespace MidiBot.MidiLib
             {
                 case MIM_DATA:
                     Console.WriteLine("MIDI Message: {0} {1} {2}", msg, BitConverter.ToString(BitConverter.GetBytes(data)), TimeSpan.FromMilliseconds(time).ToString());
+                    Midi midi = (Midi)Marshal.GetObjectForIUnknown(instance);
+                    midi.OnShortReceive(data);
                     break;
             }
         }
@@ -33,6 +37,7 @@ namespace MidiBot.MidiLib
             for (int i = 0; i < WinMM.midiInGetNumDevs(); i++)
             {
                 WinMM.midiInGetDevCaps(i, ref caps, Marshal.SizeOf(typeof(MidiInCaps)));
+                //Console.WriteLine(caps.name);
                 if (caps.name == deviceName)
                 {
                     deviceID = i;
@@ -40,9 +45,9 @@ namespace MidiBot.MidiLib
                 }
             }
             if (deviceID == -1) return;
-            MidiProc midiProc = new MidiProc(CallBack);
             IntPtr pointer = Marshal.GetIUnknownForObject(this);
-            WinMM.midiInOpen(ref inHandle, deviceID, midiProc, pointer, CALLBACK_FUNCTION);
+            midiProc = new MidiProc(CallBack);
+            int a = WinMM.midiInOpen(ref inHandle, deviceID, midiProc, pointer, CALLBACK_FUNCTION);
             WinMM.midiInStart(inHandle);
         }
 
@@ -53,6 +58,7 @@ namespace MidiBot.MidiLib
             for (int i = 0; i < WinMM.midiOutGetNumDevs(); i++)
             {
                 WinMM.midiOutGetDevCaps(i, ref caps, Marshal.SizeOf(typeof(MidiOutCaps)));
+                //Console.WriteLine(caps.name);
                 if (caps.name == deviceName)
                 {
                     deviceID = i;

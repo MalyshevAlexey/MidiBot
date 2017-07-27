@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using LibUsbDotNet;
+﻿using LibUsbDotNet;
 using LibUsbDotNet.Main;
-using MonoLibUsb;
-using MonoLibUsb.Transfer;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Threading;
-using System.IO;
+using System;
 
 namespace MidiBot.UsbLib
 {
@@ -34,6 +23,13 @@ namespace MidiBot.UsbLib
 
         public Usb (int vid, int pid)
         {
+            //UsbRegDeviceList allDevices = UsbDevice.AllDevices;
+            //UsbRegistry push = allDevices.Find(new UsbDeviceFinder(vid, pid));
+            //push.Open(out device);
+            //IUsbDevice wholePush = device as IUsbDevice;
+
+            //Console.WriteLine(usbRegistry.Name + " " + usbRegistry.IsAlive);
+
             ec = ErrorCode.None;
             GetDevice(vid, pid);
             GetWriter();

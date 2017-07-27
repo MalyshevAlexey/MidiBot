@@ -16,13 +16,10 @@ namespace MidiBot
         static void Main()
         {
             Midi midi = new Midi();
-            midi.OutOpen("fromDAW");
-            midi.InOpen("toDAW");
-
-
-
-
-
+            midi.OutOpen("MIDIOUT2 (Ableton Push 2)");
+            midi.InOpen("MIDIIN2 (Ableton Push 2)");
+            midi.SendMidi(new byte[] { 0x90, 0x3C, 0x7F, 0x00 });
+            midi.OnShortReceive = test;
 
             //midi.OutOpen("Ableton Push 2");
             //midi.InOpen("Ableton Push 2");
@@ -33,12 +30,19 @@ namespace MidiBot
 
             //Push2Controller push2 = new Push2Controller();
 
+            
 
             //Usb usb = new Usb();
 
             Console.ReadKey();
 
             
+        }
+
+        private static int test(int a)
+        {
+            Console.WriteLine("Programm return");
+            return a;
         }
     }
 }
