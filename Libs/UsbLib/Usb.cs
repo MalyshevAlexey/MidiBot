@@ -43,11 +43,6 @@ namespace MidiBot.UsbLib
         {
             ec = writer.Write(frame, timeout, out bytesWritten);
         }
-
-        
-
-        
-        
     }
     //[Flags]
     //public enum DICFG

@@ -40,7 +40,6 @@ namespace MidiBot.MidiLib
                 }
             }
             if (deviceID == -1) return;
-            Console.WriteLine(deviceID);
             MidiProc midiProc = new MidiProc(CallBack);
             IntPtr pointer = Marshal.GetIUnknownForObject(this);
             WinMM.midiInOpen(ref inHandle, deviceID, midiProc, pointer, CALLBACK_FUNCTION);
@@ -51,7 +50,7 @@ namespace MidiBot.MidiLib
         {
             MidiOutCaps caps = new MidiOutCaps();
             int deviceID = -1;
-            for (int i = 0; i < WinMM.midiInGetNumDevs(); i++)
+            for (int i = 0; i < WinMM.midiOutGetNumDevs(); i++)
             {
                 WinMM.midiOutGetDevCaps(i, ref caps, Marshal.SizeOf(typeof(MidiOutCaps)));
                 if (caps.name == deviceName)
