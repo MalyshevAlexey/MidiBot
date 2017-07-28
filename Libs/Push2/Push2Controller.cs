@@ -115,16 +115,16 @@ namespace MidiBot.Push2
             byte[] bytedata = BitmapToArray(bmp);
             int count = 0;
             int next = 0;
-            for (int y = 0; y < 160; y++)
+            for (int y = 0; y < 160; y++)       // Iterate all lines
             {
-                for (int x = 0; x < 960; x++)
+                for (int x = 0; x < 960; x++)   // Iterate each pixes in line
                 {
                     int pixel = PixelConverter(bytedata[next++], bytedata[next++], bytedata[next++]); // Blue Green Red
-                    int pixelXor = pixel ^ xOrMasks[x % 2];     //first or second element
+                    int pixelXor = pixel ^ xOrMasks[x % 2];     // xOring with first or second short
                     frame[count++] = (byte)(pixelXor & 0xFF);   // getting lower byte
                     frame[count++] = (byte)(pixelXor >> 8);     // getting upper byte
                 }
-                count += 128; //line mus be 2048 bytes
+                count += 128; // line mus be 2048 bytes
             }
             return frame;
         }

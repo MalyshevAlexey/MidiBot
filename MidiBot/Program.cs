@@ -1,6 +1,7 @@
 ﻿using MidiBot.MidiLib;
 using MidiBot;
 using System;
+using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,14 +13,37 @@ namespace MidiBot
 {
     static class Program
     {
+        private delegate bool ConsoleEventDelegate(int eventType);
+        static ConsoleEventDelegate handler;
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
+        static bool ConsoleEventCallback(int eventType)
+        {
+            if (eventType == 2)
+                midi.Close();
+                
+            return false;
+        }
+
+        static Midi midi;
+
         [STAThread]
         static void Main()
         {
-            Midi midi = new Midi();
-            midi.OutOpen("MIDIOUT2 (Ableton Push 2)");
-            midi.InOpen("MIDIIN2 (Ableton Push 2)");
+            handler = new ConsoleEventDelegate(ConsoleEventCallback);
+            SetConsoleCtrlHandler(handler, true);
+
+            midi = new Midi();
+            //midi.OutOpen("MIDIOUT2 (Ableton Push 2)");
+            //midi.InOpen("MIDIIN2 (Ableton Push 2)");
+            midi.OutOpen("fromDAW");
+            midi.InOpen("toDAW");
             midi.SendMidi(new byte[] { 0x90, 0x3C, 0x7F, 0x00 });
+            midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0A, 0x00, 0xF7 });
+            midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0B, 0x00, 0xF7 });
+            midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0C, 0x00, 0xF7 });
             midi.OnShortReceive = test;
+            midi.OnLongReceive = test;
 
             //midi.OutOpen("Ableton Push 2");
             //midi.InOpen("Ableton Push 2");
@@ -30,19 +54,15 @@ namespace MidiBot
 
             //Push2Controller push2 = new Push2Controller();
 
-            
-
-            //Usb usb = new Usb();
-
             Console.ReadKey();
 
-            
+            midi.OutClose();
+            midi.InClose();
         }
 
-        private static int test(int a)
+        private static void test(byte[] data, int time)
         {
-            Console.WriteLine("Programm return");
-            return a;
+            Console.WriteLine("Message received {0} at {1}", BitConverter.ToString(data), TimeSpan.FromMilliseconds(time));
         }
     }
 }
