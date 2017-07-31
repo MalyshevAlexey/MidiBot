@@ -11,11 +11,19 @@ namespace MidiBotTesting
     {
         string inDeviceName = "testMidi";
         string outDeviceName = "testMidi";
+        Midi midi;
+        PrivateObject obj;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            midi = new Midi();
+            obj = new PrivateObject(midi);
+        }
 
         [TestMethod]
         public void GetInIdByNameTest()
         {
-            PrivateObject obj = new PrivateObject(new Midi());
             int id = (int)obj.Invoke("GetInIdByName", new object[] { inDeviceName });
             Assert.IsTrue(id > -1);
         }
