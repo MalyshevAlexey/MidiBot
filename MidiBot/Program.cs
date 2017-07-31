@@ -28,37 +28,52 @@ namespace MidiBot
         static Midi midi;
 
         [STAThread]
-        static void Main()
+        static int Main()
         {
-            handler = new ConsoleEventDelegate(ConsoleEventCallback);
-            SetConsoleCtrlHandler(handler, true);
+            try
+            {
+                handler = new ConsoleEventDelegate(ConsoleEventCallback);
+                SetConsoleCtrlHandler(handler, true);
 
-            midi = new Midi();
-            midi.OutOpen("Ableton Push 2");
-            midi.InOpen("Ableton Push 2");
-            //midi.OutOpen("MIDIOUT2 (Ableton Push 2)");
-            //midi.InOpen("MIDIIN2 (Ableton Push 2)");
-            //midi.OutOpen("fromDAW");
-            //midi.InOpen("toDAW");
-            midi.SendMidi(new byte[] { 0x90, 0x3C, 0x7F, 0x00 });
-            Thread.Sleep(1000);
-            midi.SendMidi(new byte[] { 0x80, 0x3C, 0x00, 0x00 });
-            midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0A, 0x00, 0xF7 });
-            //midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0B, 0x00, 0xF7 });
-            //midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0C, 0x00, 0xF7 });
-            midi.OnShortReceive = test;
-            midi.OnLongReceive = test;
+                midi = new Midi();
+                midi.InOpen("testMidi");
+
+                //midi.InOpen("Ableton Push 2");
+                //midi.OutOpen("Ableton Push 2"); 
+                ////midi.OutOpen("MIDIOUT2 (Ableton Push 2)");
+                ////midi.InOpen("MIDIIN2 (Ableton Push 2)");
+                ////midi.OutOpen("fromDAW");
+                ////midi.InOpen("toDAW");
+                //midi.SendMidi(new byte[] { 0x90, 0x3C, 0x7F, 0x00 });
+                //Thread.Sleep(1000);
+                //midi.SendMidi(new byte[] { 0x80, 0x3C, 0x00, 0x00 });
+                //midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0A, 0x00, 0xF7 });
+                ////midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0B, 0x00, 0xF7 });
+                ////midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0C, 0x00, 0xF7 });
+                //midi.OnShortReceive = test;
+                //midi.OnLongReceive = test;
 
 
-            
 
 
-            //Push2Controller push2 = new Push2Controller();
 
+                //Push2Controller push2 = new Push2Controller();
+
+                midi.OutClose();
+                midi.InClose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadKey();
+                return -1;
+            }
+            finally
+            {
+                Console.WriteLine("Block finally");
+            }
             Console.ReadKey();
-
-            midi.OutClose();
-            midi.InClose();
+            return 0;
         }
 
         private static void test(byte[] data, int time)

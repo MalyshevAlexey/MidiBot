@@ -7,26 +7,22 @@ using System.Threading.Tasks;
 
 namespace MidiBot.MidiLib
 {
-    internal delegate void MidiProc(int inHandle, int msg, IntPtr instance, int data, int time);    // callback via delegate
+    internal delegate void MidiProc(int inHandle, int msg, IntPtr instance, int data, int time);    // delegate for callback function
 
     public class Midi
     {
-        public struct LongAnswer
-        {
-            public byte[] data;
-            public TimeSpan time;
-        };
         /// <summary>
-        /// callback function
+        /// callback function delegate
         /// </summary>
         private static MidiProc midiProc;
         private int inHandle;                                   // midi IN handle
         private int outHandle;                                  // midi OUT handle
         private MidiHeader header;                              // midi header
-        public LongAnswer longAnswer;
-        private const int CALLBACK_FUNCTION = 0x00030000;       // flag for callback
+        private const int CALLBACK_FUNCTION = 0x00030000;       // flag for callback function
         private const int MIM_DATA = 0x3C3;                     // constant identify that short data received
         private const int MIM_LONGDATA = 0x3C4;                 // constant idnetify that long data received
+        public LongAnswer longAnswer;
+        public byte[] shortAnswer;
         /// <summary> fires when short message received </summary>
         public Action<byte[], int> OnShortReceive;              // 
         public Action<byte[], int> OnLongReceive;               // fires when long message received
@@ -38,24 +34,24 @@ namespace MidiBot.MidiLib
 
         static private void CallBack(int inHandle, int msg, IntPtr instance, int data, int time)
         {
-            Midi midi = (Midi)Marshal.GetObjectForIUnknown(instance);   // get midi object from pointer
+            Midi midi = (Midi)Marshal.GetObjectForIUnknown(instance); // get midi object from pointer
             switch (msg)
             {
-                case MIM_DATA:          // if short message received
+                case MIM_DATA: // if short message received
+                    midi.shortAnswer = BitConverter.GetBytes(data); // save last message
                     midi.OnShortReceive?.Invoke(BitConverter.GetBytes(data), time); //if not null invoke
                     break;
-                case MIM_LONGDATA:      // if long message received
-                    midi.longAnswer = new LongAnswer();
-                    MidiHeader header = (MidiHeader)Marshal.PtrToStructure((IntPtr)data, typeof(MidiHeader));
-                    long message = (long)Marshal.PtrToStructure(header.data, typeof(long));
-                    byte[] answer = new byte[header.bytesRecorded];
-                    if (answer.Length != 0)
+                case MIM_LONGDATA: // if long message received
+                    midi.longAnswer = new LongAnswer(); // init LongAnswer structure
+                    MidiHeader header = (MidiHeader)Marshal.PtrToStructure((IntPtr)data, typeof(MidiHeader)); // get header from pointer
+                    if (header.bytesRecorded != 0) // if answer is valid
                     {
-                        Marshal.Copy(header.data, answer, 0, header.bytesRecorded);
-                        midi.longAnswer.data = answer;
-                        midi.longAnswer.time = TimeSpan.FromMilliseconds(time);
-                        midi.OnLongReceive?.Invoke(answer, time);
-                        midi.AddSysexBuffer();
+                        byte[] message = new byte[header.bytesRecorded]; // init message array
+                        Marshal.Copy(header.data, message, 0, header.bytesRecorded); // get message from pointer
+                        midi.longAnswer.Data = message; // save last message
+                        midi.longAnswer.Time = TimeSpan.FromMilliseconds(time); // save last time
+                        midi.OnLongReceive?.Invoke(message, time); // if not null invoke
+                        midi.AddSysexBuffer(); // add buffer to receive next long message
                     }
                     break;
                     
@@ -77,15 +73,22 @@ namespace MidiBot.MidiLib
         {
             MidiInCaps caps = new MidiInCaps();
             int deviceID = -1;
-            for (int i = 0; i < WinMM.midiInGetNumDevs(); i++)
+            int num = WinMM.midiInGetNumDevs();
+            if (num == 0)
+                throw new Exception("There are no midi IN devices");
+            int capSize = Marshal.SizeOf(typeof(MidiInCaps));
+            for (int i = 0; i < num; i++)
             {
-                WinMM.midiInGetDevCaps(i, ref caps, Marshal.SizeOf(typeof(MidiInCaps)));
+                if (WinMM.midiInGetDevCaps(i, ref caps, capSize) != 0)
+                    throw new Exception("Cannot get midi IN device with ID " + i);
                 if (caps.name == deviceName)
                 {
                     deviceID = i;
                     break;
                 }
             }
+            if (deviceID == -1)
+                throw new Exception("Midi IN device " + deviceName + " not found");
             return deviceID;
         }
 
@@ -93,13 +96,15 @@ namespace MidiBot.MidiLib
         {
             int result = -1;
             int deviceID = GetInIdByName(deviceName);
-            if (deviceID == -1) return result;
             IntPtr pointer = Marshal.GetIUnknownForObject(this);
             midiProc = new MidiProc(CallBack);
             result = WinMM.midiInOpen(ref inHandle, deviceID, midiProc, pointer, CALLBACK_FUNCTION);
-            result = AddSysexBuffer();
+            if (result != 0)
+                throw new Exception("Cannot open IN device " + deviceName);
+            AddSysexBuffer();
             result = WinMM.midiInStart(inHandle);
-            //GetInNames();
+            if (result != 0)
+                throw new Exception("Cannot start IN device " + deviceName);
             return result;
         }
 
@@ -115,7 +120,11 @@ namespace MidiBot.MidiLib
             header.flags = 0;
             Marshal.StructureToPtr(header, nhdr, false);
             result = WinMM.midiInPrepareHeader(inHandle, nhdr, shdr);
+            if (result != 0)
+                throw new Exception("Cannot prepare IN header");
             result = WinMM.midiInAddBuffer(inHandle, nhdr, shdr);
+            if (result != 0)
+                throw new Exception("Cannot add IN buffer");
             return result;
         }
 
@@ -134,7 +143,8 @@ namespace MidiBot.MidiLib
         {
             MidiOutCaps caps = new MidiOutCaps();
             int deviceID = -1;
-            for (int i = 0; i < WinMM.midiOutGetNumDevs(); i++)
+            int num = WinMM.midiOutGetNumDevs();
+            for (int i = 0; i < num; i++)
             {
                 WinMM.midiOutGetDevCaps(i, ref caps, Marshal.SizeOf(typeof(MidiOutCaps)));
                 if (caps.name == deviceName)
@@ -143,6 +153,8 @@ namespace MidiBot.MidiLib
                     break;
                 }
             }
+            if (deviceID == -1)
+                throw new Exception("Midi OUT device " + deviceName + " not found");
             return deviceID;
         }
 
@@ -150,18 +162,20 @@ namespace MidiBot.MidiLib
         {
             int result = -1;
             int deviceID = GetOutIdByName(deviceName);
-            if (deviceID == -1) return result;
             result = WinMM.midiOutOpen(ref outHandle, deviceID, null, 0, 0);
-            //GetOutNames();
+            if (result != 0)
+                throw new Exception("Cannot open OUT device " + deviceName);
             return result;
         }
 
         public int SendMidi(byte[] midi)
         {
             int result = -1;
-            int msg = BitConverter.ToInt32(midi, 0);    // convert byte[] to int
-            result = WinMM.midiOutShortMsg(outHandle, msg);      // sending message
-            AfterShortSent?.Invoke(midi);               // if not null Invoke
+            int msg = BitConverter.ToInt32(midi, 0); // convert byte[] to int
+            result = WinMM.midiOutShortMsg(outHandle, msg); // sending message
+            if (result != 0)
+                throw new Exception("Cannot send short message");
+            AfterShortSent?.Invoke(midi); // if not null Invoke
             return result;
         }
 
@@ -176,8 +190,14 @@ namespace MidiBot.MidiLib
             IntPtr nhdr = Marshal.AllocHGlobal(shdr);
             Marshal.StructureToPtr(mhdr, nhdr, false);
             result = WinMM.midiOutPrepareHeader(outHandle, nhdr, shdr);
+            if (result != 0)
+                throw new Exception("Cannot prepare OUT header");
             result = WinMM.midiOutLongMsg(outHandle, nhdr, shdr);
+            if (result != 0)
+                throw new Exception("Cannot send long message");
             result = WinMM.midiOutUnprepareHeader(outHandle, nhdr, shdr);
+            if (result != 0)
+                throw new Exception("Cannot ");
             AfterLongSent?.Invoke(sx);                                  // if not null Invoke
             return result;
         }
