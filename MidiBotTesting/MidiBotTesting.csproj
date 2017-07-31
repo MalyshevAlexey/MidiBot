@@ -54,11 +54,16 @@
   <ItemGroup>
     <Compile Include="BmpToDisplayTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DeviceConnectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Libs\MidiLib\MidiLib.csproj">
+      <Project>{55bcd6cf-3a09-4381-833a-f9f2abac5bfb}</Project>
+      <Name>MidiLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Libs\Push2\Push2.csproj">
       <Project>{2a896c1f-5286-436f-a2e7-6e929de21602}</Project>
       <Name>Push2</Name>

@@ -34,22 +34,23 @@ namespace MidiBot
             SetConsoleCtrlHandler(handler, true);
 
             midi = new Midi();
+            midi.OutOpen("Ableton Push 2");
+            midi.InOpen("Ableton Push 2");
             //midi.OutOpen("MIDIOUT2 (Ableton Push 2)");
             //midi.InOpen("MIDIIN2 (Ableton Push 2)");
-            midi.OutOpen("fromDAW");
-            midi.InOpen("toDAW");
+            //midi.OutOpen("fromDAW");
+            //midi.InOpen("toDAW");
             midi.SendMidi(new byte[] { 0x90, 0x3C, 0x7F, 0x00 });
+            Thread.Sleep(1000);
+            midi.SendMidi(new byte[] { 0x80, 0x3C, 0x00, 0x00 });
             midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0A, 0x00, 0xF7 });
-            midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0B, 0x00, 0xF7 });
-            midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0C, 0x00, 0xF7 });
+            //midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0B, 0x00, 0xF7 });
+            //midi.SendSysex(new byte[] { 0xF0, 0x00, 0x21, 0x1D, 0x01, 0x01, 0x0C, 0x00, 0xF7 });
             midi.OnShortReceive = test;
             midi.OnLongReceive = test;
 
-            //midi.OutOpen("Ableton Push 2");
-            //midi.InOpen("Ableton Push 2");
-            //midi.SendMidi(new byte[] { 0x90, 0x3C, 0x7F, 0x00 });
-            //Thread.Sleep(1000);
-            //midi.SendMidi(new byte[] { 0x80, 0x3C, 0x00, 0x00 });
+
+            
 
 
             //Push2Controller push2 = new Push2Controller();
