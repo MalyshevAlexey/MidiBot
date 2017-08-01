@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{55BCD6CF-3A09-4381-833A-F9F2ABAC5BFB}</ProjectGuid>
+    <ProjectGuid>{3D525A44-ADF8-4100-B5DA-D7292175660E}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>MidiBot.MidiLib</RootNamespace>
-    <AssemblyName>MidiLib</AssemblyName>
+    <RootNamespace>MidiBot.AudioLib</RootNamespace>
+    <AssemblyName>AudioLib</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,17 +36,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\MidiBot\App.config">
-      <Link>App.config</Link>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="LastAnswer.cs" />
-    <Compile Include="Midi.cs" />
-    <Compile Include="MidiHeader.cs" />
-    <Compile Include="MidiInCaps.cs" />
-    <Compile Include="MidiOutCaps.cs" />
+    <Compile Include="Audio.cs" />
+    <Compile Include="WaveFormat.cs" />
+    <Compile Include="WaveHeader.cs" />
+    <Compile Include="WaveInCaps.cs" />
     <Compile Include="WinMM.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

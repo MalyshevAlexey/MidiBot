@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CPOL.html" />
+    <None Include="packages.config" />
     <None Include="Resources\Paloma.ico" />
   </ItemGroup>
   <ItemGroup>
