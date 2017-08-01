@@ -21,8 +21,8 @@ namespace MidiBot.MidiLib
         private const int CALLBACK_FUNCTION = 0x00030000;       // flag for callback function
         private const int MIM_DATA = 0x3C3;                     // constant identify that short data received
         private const int MIM_LONGDATA = 0x3C4;                 // constant idnetify that long data received
-        public LongAnswer longAnswer;
-        public byte[] shortAnswer;
+        public LastAnswer LongAnswer;
+        public LastAnswer ShortAnswer;
         /// <summary> fires when short message received </summary>
         public Action<byte[], int> OnShortReceive;              // 
         public Action<byte[], int> OnLongReceive;               // fires when long message received
@@ -38,18 +38,20 @@ namespace MidiBot.MidiLib
             switch (msg)
             {
                 case MIM_DATA: // if short message received
-                    midi.shortAnswer = BitConverter.GetBytes(data); // save last message
+                    midi.ShortAnswer = new LastAnswer(); // init LastAnswer structure
+                    midi.ShortAnswer.Data = BitConverter.GetBytes(data); // save last message
+                    midi.ShortAnswer.Time = TimeSpan.FromMilliseconds(time); // save last time
                     midi.OnShortReceive?.Invoke(BitConverter.GetBytes(data), time); //if not null invoke
                     break;
                 case MIM_LONGDATA: // if long message received
-                    midi.longAnswer = new LongAnswer(); // init LongAnswer structure
+                    midi.LongAnswer = new LastAnswer(); // init LastAnswer structure
                     MidiHeader header = (MidiHeader)Marshal.PtrToStructure((IntPtr)data, typeof(MidiHeader)); // get header from pointer
                     if (header.bytesRecorded != 0) // if answer is valid
                     {
                         byte[] message = new byte[header.bytesRecorded]; // init message array
                         Marshal.Copy(header.data, message, 0, header.bytesRecorded); // get message from pointer
-                        midi.longAnswer.Data = message; // save last message
-                        midi.longAnswer.Time = TimeSpan.FromMilliseconds(time); // save last time
+                        midi.LongAnswer.Data = message; // save last message
+                        midi.LongAnswer.Time = TimeSpan.FromMilliseconds(time); // save last time
                         midi.OnLongReceive?.Invoke(message, time); // if not null invoke
                         midi.AddSysexBuffer(); // add buffer to receive next long message
                     }
@@ -100,7 +102,7 @@ namespace MidiBot.MidiLib
             midiProc = new MidiProc(CallBack);
             result = WinMM.midiInOpen(ref inHandle, deviceID, midiProc, pointer, CALLBACK_FUNCTION);
             if (result != 0)
-                throw new Exception("Cannot open IN device " + deviceName);
+                throw new Exception("MidiInOpen failed with code: " + result + ". Cannot open IN device " + deviceName);
             AddSysexBuffer();
             result = WinMM.midiInStart(inHandle);
             if (result != 0)

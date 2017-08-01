@@ -36,7 +36,9 @@ namespace MidiBot
                 SetConsoleCtrlHandler(handler, true);
 
                 midi = new Midi();
-                midi.InOpen("testMidi");
+                midi.InOpen("midiTest");
+                midi.OutOpen("midiTest");
+                midi.SendMidi(new byte[] { 0x90, 0x3C, 0x7F, 0x00 });
 
                 //midi.InOpen("Ableton Push 2");
                 //midi.OutOpen("Ableton Push 2"); 
