@@ -13,6 +13,7 @@ namespace MidiBot.AudioLib
     {
         private const int CALLBACK_FUNCTION = 0x00030000;
         private const int WAVEIN_DATA = 0x3C0;
+        private const int WAVEOUT_DATA = 0x3C4;
         private IntPtr waveInHandle;
         private IntPtr waveOutHandle;
         WaveDelegate callback;
@@ -36,6 +37,9 @@ namespace MidiBot.AudioLib
                     foreach (var item in message)
                         Console.WriteLine(item);
                     audio.ReuseInBuffer();
+                    break;
+                case WAVEOUT_DATA:
+
                     break;
             }
         }
