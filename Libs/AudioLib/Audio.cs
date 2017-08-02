@@ -66,10 +66,11 @@ namespace MidiBot.AudioLib
             callback = new WaveDelegate(CallBack);
             IntPtr pointer = Marshal.GetIUnknownForObject(this);
             WinMM.waveInOpen(out waveInHandle, 0, waveFormat, callback, pointer, CALLBACK_FUNCTION);
-            int result = WinMM.waveOutOpen(out waveInHandle, 0, waveFormat, callback, pointer, CALLBACK_FUNCTION);
-            Console.WriteLine(result);
             AddInBuffer();
             WinMM.waveInStart(waveInHandle);
+            int result = WinMM.waveOutOpen(out waveInHandle, 0, waveFormat, callback, pointer, CALLBACK_FUNCTION);
+            Console.WriteLine(result);
+            
 
 
         }

@@ -37,9 +37,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Audio.cs" />
+    <Compile Include="IWaveIn.cs" />
+    <Compile Include="StoppedEventArgs.cs" />
     <Compile Include="WaveFormat.cs" />
     <Compile Include="WaveHeader.cs" />
+    <Compile Include="WaveIn.cs" />
+    <Compile Include="WaveInBuffer.cs" />
     <Compile Include="WaveInCaps.cs" />
+    <Compile Include="WaveInEventArgs.cs" />
     <Compile Include="WinMM.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
