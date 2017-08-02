@@ -18,7 +18,7 @@ namespace MidiBot.AudioLib
         public short wFormatTag;
         public short nChannels;
         public int nSamplesPerSec;
-        public int nAvgBytesPerSec;
+        public int AverageBytesPerSecond;
         public short nBlockAlign;
         public short wBitsPerSample;
         public short cbSize;
@@ -42,7 +42,7 @@ namespace MidiBot.AudioLib
             cbSize = 0;
 
             nBlockAlign = (short)(channels * (bits / 8));
-            nAvgBytesPerSec = nSamplesPerSec * nBlockAlign;
+            AverageBytesPerSecond = nSamplesPerSec * nBlockAlign;
         }
     }
 }

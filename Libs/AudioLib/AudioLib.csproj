@@ -37,7 +37,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Audio.cs" />
+    <Compile Include="BufferedWaveProvider.cs" />
     <Compile Include="IWaveIn.cs" />
+    <Compile Include="IWaveProvider.cs" />
     <Compile Include="StoppedEventArgs.cs" />
     <Compile Include="WaveFormat.cs" />
     <Compile Include="WaveHeader.cs" />

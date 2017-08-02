@@ -9,9 +9,15 @@ namespace MidiBot.AudioLib
 {
     internal class WinMM
     {
+        internal delegate void WaveCallback(IntPtr hdrvr, int msg, IntPtr instance, WaveHeader wavhdr, int dwParam2);
+
         private const string mmdll = "winmm.dll";
 
         // IN
+
+        public const int WaveInData = 0x3C0;
+
+        public const int CallbackFunction = 0x00030000;
 
         [DllImport(mmdll)]
         public static extern int waveInGetNumDevs();
@@ -20,7 +26,7 @@ namespace MidiBot.AudioLib
         internal static extern int waveInGetDevCaps(int deviceID, ref WaveInCaps waveInCaps, int sizeOfWaveInCaps);
 
         [DllImport(mmdll)]
-        public static extern int waveInOpen(out IntPtr phwi, int deviceID, WaveFormat lpFormat, WaveDelegate dwCallback, IntPtr dwInstance, int dwFlags);
+        public static extern int waveInOpen(out IntPtr phwi, int deviceID, WaveFormat lpFormat, WaveCallback dwCallback, IntPtr dwInstance, int dwFlags);
 
         [DllImport(mmdll)]
         public static extern int waveInPrepareHeader(IntPtr hWaveIn, WaveHeader lpWaveInHdr, int uSize);
@@ -40,7 +46,7 @@ namespace MidiBot.AudioLib
         public static extern int waveOutGetNumDevs();
 
         [DllImport(mmdll)]
-        public static extern int waveOutOpen(out IntPtr phwi, int deviceID, WaveFormat lpFormat, WaveDelegate dwCallback, IntPtr dwInstance, int dwFlags);
+        public static extern int waveOutOpen(out IntPtr phwi, int deviceID, WaveFormat lpFormat, WaveCallback dwCallback, IntPtr dwInstance, int dwFlags);
 
     }
 }
