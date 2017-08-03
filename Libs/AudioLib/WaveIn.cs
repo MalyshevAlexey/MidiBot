@@ -11,19 +11,23 @@ namespace MidiBot.AudioLib
     {
         private IntPtr waveInHandle;
         private volatile bool recording;
-        private WaveInBuffer buffer;
+        private WaveInBuffer[] buffers;
+        private int lastReturnedBufferIndex;
         private readonly WinMM.WaveCallback callback;
 
         public int DeviceNumber { get; set; }
+        public int BufferMilliseconds { get; set; }
         public int NumberOfBuffers { get; set; }
         public WaveFormat WaveFormat { get; set; }
         public event EventHandler<WaveInEventArgs> DataAvailable;
         public event EventHandler<StoppedEventArgs> RecordingStopped;
 
-        int bufferSize = 16384;
-
         public WaveIn()
         {
+            DeviceNumber = 0;
+            WaveFormat = new WaveFormat();
+            BufferMilliseconds = 100;
+            NumberOfBuffers = 3;
             callback = new WinMM.WaveCallback(CallBack);
         }
 
@@ -34,15 +38,34 @@ namespace MidiBot.AudioLib
                 var hBuffer = (GCHandle)waveHeader.userData;
                 var buffer = (WaveInBuffer)hBuffer.Target;
                 if (buffer == null) return;
+                lastReturnedBufferIndex = Array.IndexOf(buffers, buffer);
                 DataAvailable?.Invoke(this, new WaveInEventArgs(buffer.Data, buffer.BytesRecorded));
-                buffer.Reuse();
+                buffer.Use();
             }
+        }
+
+        private void CreateBuffers()
+        {
+            int bufferSize = BufferMilliseconds * WaveFormat.AverageBytesPerSecond / 1000;
+            if (bufferSize % WaveFormat.BlockAlign != 0)
+                bufferSize -= bufferSize % WaveFormat.BlockAlign;
+            buffers = new WaveInBuffer[NumberOfBuffers];
+            for (int n = 0; n < buffers.Length; n++)
+                buffers[n] = new WaveInBuffer(waveInHandle, bufferSize);
+        }
+
+        private void EnqueueBuffers()
+        {
+            foreach (var buffer in buffers)
+                if (!buffer.InQueue)
+                    buffer.Use();
         }
 
         public void StartRecording()
         {
             WinMM.waveInOpen(out waveInHandle, DeviceNumber, WaveFormat, callback, IntPtr.Zero, WinMM.CallbackFunction);
-            buffer = new WaveInBuffer(waveInHandle, bufferSize);
+            CreateBuffers();
+            EnqueueBuffers();
             WinMM.waveInStart(waveInHandle);
             recording = true;
         }

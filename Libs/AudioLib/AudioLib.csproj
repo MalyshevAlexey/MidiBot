@@ -43,11 +43,15 @@
     <Compile Include="StoppedEventArgs.cs" />
     <Compile Include="WaveFormat.cs" />
     <Compile Include="WaveHeader.cs" />
+    <Compile Include="WaveHeaderFlags.cs" />
     <Compile Include="WaveIn.cs" />
     <Compile Include="WaveInBuffer.cs" />
     <Compile Include="WaveInCaps.cs" />
     <Compile Include="WaveInEventArgs.cs" />
     <Compile Include="WinMM.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

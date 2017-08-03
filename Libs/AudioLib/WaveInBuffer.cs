@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MidiBot.AudioLib
 {
@@ -33,12 +29,20 @@ namespace MidiBot.AudioLib
             }
         }
 
-        public WaveInBuffer(IntPtr waveInHandle, int bufferSize)
+        public int BufferSize
         {
-            this.bufferSize = bufferSize;
-            this.buffer = new byte[bufferSize];
-            this.hBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            this.waveInHandle = waveInHandle;
+            get
+            {
+                return bufferSize;
+            }
+        }
+
+        public WaveInBuffer(IntPtr WaveInHandle, int BufferSize)
+        {
+            bufferSize = BufferSize;
+            buffer = new byte[bufferSize];
+            hBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            waveInHandle = WaveInHandle;
 
             header = new WaveHeader();
             hHeader = GCHandle.Alloc(header, GCHandleType.Pinned);
@@ -47,16 +51,21 @@ namespace MidiBot.AudioLib
             header.loops = 1;
             hThis = GCHandle.Alloc(this);
             header.userData = (IntPtr)hThis;
-
-            WinMM.waveInPrepareHeader(waveInHandle, header, Marshal.SizeOf(header));
-            WinMM.waveInAddBuffer(waveInHandle, header, Marshal.SizeOf(header));
         }
 
-        public void Reuse()
+        public void Use()
         {
             //WinMM.waveInUnprepareHeader(waveInHandle, header, Marshal.SizeOf(header));
             WinMM.waveInPrepareHeader(waveInHandle, header, Marshal.SizeOf(header));
             WinMM.waveInAddBuffer(waveInHandle, header, Marshal.SizeOf(header));
+        }
+
+        public bool InQueue
+        {
+            get
+            {
+                return (header.flags & WaveHeaderFlags.InQueue) == WaveHeaderFlags.InQueue;
+            }
         }
     }
 }

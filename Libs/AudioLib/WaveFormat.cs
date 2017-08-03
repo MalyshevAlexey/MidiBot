@@ -15,16 +15,23 @@ namespace MidiBot.AudioLib
     [StructLayout(LayoutKind.Sequential)]
     public class WaveFormat
     {
-        public short wFormatTag;
-        public short nChannels;
-        public int nSamplesPerSec;
-        public int AverageBytesPerSecond;
-        public short nBlockAlign;
-        public short wBitsPerSample;
-        public short cbSize;
+        protected short waveFormatTag;
+        protected short channels;
+        protected int sampleRate;
+        protected int averageBytesPerSecond;
+        protected short blockAlign;
+        protected short bitsPerSample;
+        protected short extraSize;
+
+        public int Channels => channels;
+        public int SampleRate => sampleRate;
+        public int AverageBytesPerSecond => averageBytesPerSecond;
+        public int BlockAlign => blockAlign;
+        public int BitsPerSample => bitsPerSample;
+        public int ExtraSize => extraSize;
 
         public WaveFormat() 
-            : this(44100, 16, 2)
+            : this(44100, 16, 1)
         {
         }
 
@@ -33,16 +40,17 @@ namespace MidiBot.AudioLib
         {
         }
 
-        public WaveFormat(int rate, int bits, int channels)
+        public WaveFormat(int SampleRate, int BitsPerSample, int Channels)
         {
-            wFormatTag = (short)WaveFormats.Pcm;
-            nChannels = (short)channels;
-            nSamplesPerSec = rate;
-            wBitsPerSample = (short)bits;
-            cbSize = 0;
-
-            nBlockAlign = (short)(channels * (bits / 8));
-            AverageBytesPerSecond = nSamplesPerSec * nBlockAlign;
+            waveFormatTag = (short)WaveFormats.Pcm;
+            channels = (short)Channels;
+            sampleRate = SampleRate;
+            bitsPerSample = (short)BitsPerSample;
+            extraSize = 0;
+            blockAlign = (short)(Channels * (bitsPerSample / 8));
+            averageBytesPerSecond = sampleRate * blockAlign;
         }
+
+        
     }
 }

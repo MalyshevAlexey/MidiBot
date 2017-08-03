@@ -19,7 +19,7 @@ namespace MidiBot.AudioLib
         /// <summary>for client's use (dwUser)</summary>
         public IntPtr userData;
         /// <summary>assorted flags (dwFlags)</summary>
-        public int flags;
+        public WaveHeaderFlags flags;
         /// <summary>loop control counter (dwLoops)</summary>
         public int loops;
         /// <summary>PWaveHdr, reserved for driver (lpNext)</summary>
