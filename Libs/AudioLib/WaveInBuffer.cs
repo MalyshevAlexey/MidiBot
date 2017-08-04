@@ -20,7 +20,6 @@ namespace MidiBot.AudioLib
                 return buffer;
             }
         }
-
         public int BytesRecorded
         {
             get
@@ -28,7 +27,6 @@ namespace MidiBot.AudioLib
                 return header.bytesRecorded;
             }
         }
-
         public int BufferSize
         {
             get

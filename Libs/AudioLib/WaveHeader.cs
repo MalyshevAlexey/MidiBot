@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace MidiBot.AudioLib
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal class WaveHeader
+    class WaveHeader
     {
         /// <summary>pointer to locked data buffer (lpData)</summary>
         public IntPtr dataBuffer;
