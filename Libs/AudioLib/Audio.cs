@@ -23,7 +23,7 @@ namespace MidiBot.AudioLib
                 byte upper = e.Buffer[i * 2 + 1];
                 byte lower = e.Buffer[i * 2];
                 test[i] = (short)((upper << 8) | lower);
-                Console.WriteLine(test[i]);
+                //Console.WriteLine(test[i]);
             }
         }
 
