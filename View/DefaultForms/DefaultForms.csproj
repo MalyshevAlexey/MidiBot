@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3D525A44-ADF8-4100-B5DA-D7292175660E}</ProjectGuid>
+    <ProjectGuid>{A9E1603E-D6A8-47D3-A2B2-A720BFC65CB2}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>MidiBot.AudioLib</RootNamespace>
-    <AssemblyName>AudioLib</AssemblyName>
+    <RootNamespace>MidiBot.Views.DefaultForms</RootNamespace>
+    <AssemblyName>DefaultForms</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,21 +35,19 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Audio.cs" />
-    <Compile Include="IWaveIn.cs" />
-    <Compile Include="SignalGenerator.cs" />
-    <Compile Include="StoppedEventArgs.cs" />
-    <Compile Include="WaveFormat.cs" />
-    <Compile Include="WaveHeader.cs" />
-    <Compile Include="WaveHeaderFlags.cs" />
-    <Compile Include="WaveIn.cs" />
-    <Compile Include="WaveInBuffer.cs" />
-    <Compile Include="WaveInCaps.cs" />
-    <Compile Include="WaveInEventArgs.cs" />
-    <Compile Include="WinMM.cs" />
+    <Compile Include="AudioWave.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AudioWave.Designer.cs">
+      <DependentUpon>AudioWave.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

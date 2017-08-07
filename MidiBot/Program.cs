@@ -8,7 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MidiBot.Push2;
-using MidiBot.AudioLib;
+using MidiBot.Views.DefaultForms;
+using System.Windows.Forms;
 
 namespace MidiBot
 {
@@ -56,7 +57,9 @@ namespace MidiBot
                 //midi.OnShortReceive = test;
                 //midi.OnLongReceive = test;
 
-                Audio audio = new Audio();
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new AudioWave());
 
 
 

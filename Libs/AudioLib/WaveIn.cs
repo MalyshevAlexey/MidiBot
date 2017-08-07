@@ -15,6 +15,7 @@ namespace MidiBot.AudioLib
         private WaveInBuffer[] buffers;
         private int lastReturnedBufferIndex;
         private readonly WinMM.WaveCallback callback;
+        private SignalGenerator signalGenerator;
         private Thread generatorThread;
 
         public int DeviceNumber { get; set; }
@@ -31,6 +32,7 @@ namespace MidiBot.AudioLib
             BufferMilliseconds = 100;
             NumberOfBuffers = 3;
             callback = new WinMM.WaveCallback(CallBack);
+            signalGenerator = new SignalGenerator(WaveFormat);
         }
 
         private void CallBack(IntPtr hdrvr, int msg, IntPtr instance, WaveHeader waveHeader, int reserved)
@@ -70,31 +72,14 @@ namespace MidiBot.AudioLib
             EnqueueBuffers();
             WinMM.waveInStart(waveInHandle);
             recording = true;
-            generatorThread = new Thread(Generate);
-            generatorThread.IsBackground = true;
-            generatorThread.Start();
-        }
-
-        private void Generate()
-        {
-            int _samples = 16384;
-            double _frequency = 5000.0;
-            double _amplitude = 32768.0;
-            double[] values = new double[_samples];
-            while (true)
-            {
-                double theta = 2.0 * Math.PI * _frequency / WaveFormat.SampleRate;
-                for (int i = 0; i < _samples; i++)
-                {
-                    values[i] = _amplitude * Math.Sin(i * theta);
-                    Console.WriteLine(values[i]);
-                }
-            }
+            //generatorThread = new Thread(signalGenerator.GenerateSignal);
+            //generatorThread.IsBackground = true;
+            //generatorThread.Start();
         }
 
         public void StopRecording()
         {
-            throw new NotImplementedException();
+            recording = false;
         }
 
         protected virtual void Dispose(bool disposing)
