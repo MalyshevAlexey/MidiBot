@@ -49,5 +49,16 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AudioWave.resx">
+      <DependentUpon>AudioWave.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libs\AudioLib\AudioLib.csproj">
+      <Project>{3d525a44-adf8-4100-b5da-d7292175660e}</Project>
+      <Name>AudioLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,28 +4,28 @@ namespace MidiBot.AudioLib
 {
     public class Audio
     {
-        private WaveIn wi;
+        
         private readonly object lockObject;
 
-        public Audio()
-        {
-            lockObject = new object();
-            wi = new WaveIn();
-            wi.DataAvailable += new EventHandler<WaveInEventArgs>(wi_DataAvailable);
-            wi.StartRecording();
-        }
+        //public Audio()
+        //{
+        //    lockObject = new object();
+        //    wi = new WaveIn();
+        //    wi.DataAvailable += new EventHandler<WaveInEventArgs>(wi_DataAvailable);
+        //    wi.StartRecording();
+        //}
 
-        void wi_DataAvailable(object sender, WaveInEventArgs e)
-        {
-            int[] test = new int[e.Buffer.Length / wi.WaveFormat.BlockAlign];
-            for (int i = 0; i < test.Length; i ++)
-            {
-                byte upper = e.Buffer[i * 2 + 1];
-                byte lower = e.Buffer[i * 2];
-                test[i] = (short)((upper << 8) | lower);
-                //Console.WriteLine(test[i]);
-            }
-        }
+        //void wi_DataAvailable(object sender, WaveInEventArgs e)
+        //{
+        //    int[] test = new int[e.Buffer.Length / wi.WaveFormat.BlockAlign];
+        //    for (int i = 0; i < test.Length; i ++)
+        //    {
+        //        byte upper = e.Buffer[i * 2 + 1];
+        //        byte lower = e.Buffer[i * 2];
+        //        test[i] = (short)((upper << 8) | lower);
+        //        Console.WriteLine(test[i]);
+        //    }
+        //}
 
         //public enum MMRESULT : uint
         //{

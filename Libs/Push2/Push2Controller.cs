@@ -67,10 +67,8 @@ namespace MidiBot.Push2
             {
                 lock (locker)
                     frame = MakeFrame(bmp);
-                DateTime start = DateTime.Now;
                 usb.Write(frame_header, 100);
                 usb.Write(frame, 100);
-                //Console.WriteLine(DateTime.Now - start);
             }
         }
 
