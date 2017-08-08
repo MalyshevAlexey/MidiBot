@@ -49,12 +49,13 @@ namespace MidiBot.AudioLib
             header.loops = 1;
             hThis = GCHandle.Alloc(this);
             header.userData = (IntPtr)hThis;
+            WinMM.waveInPrepareHeader(waveInHandle, header, Marshal.SizeOf(header));
         }
 
         public void Use()
         {
             //WinMM.waveInUnprepareHeader(waveInHandle, header, Marshal.SizeOf(header));
-            WinMM.waveInPrepareHeader(waveInHandle, header, Marshal.SizeOf(header));
+            
             WinMM.waveInAddBuffer(waveInHandle, header, Marshal.SizeOf(header));
         }
 

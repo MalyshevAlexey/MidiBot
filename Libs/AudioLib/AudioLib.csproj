@@ -36,7 +36,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Audio.cs" />
     <Compile Include="IWaveIn.cs" />
     <Compile Include="SignalGenerator.cs" />
     <Compile Include="StoppedEventArgs.cs" />

@@ -16,6 +16,8 @@ namespace MidiBot.Views.DefaultForms
     {
         Bitmap bmpWave;
         Bitmap bmpFFT;
+        Graphics g;
+        Pen pen;
         WaveIn wi;
         double[] waveLeft;
         double[] waveRight;
@@ -23,6 +25,9 @@ namespace MidiBot.Views.DefaultForms
         public AudioWave()
         {
             InitializeComponent();
+            bmpWave = new Bitmap(pictureWave.Width, pictureWave.Height);
+            g = Graphics.FromImage(bmpWave);
+            pen = new System.Drawing.Pen(Color.WhiteSmoke);
             wi = new WaveIn();
             wi.DataAvailable += new EventHandler<WaveInEventArgs>(DataAvailable);
             wi.StartRecording();
@@ -38,24 +43,18 @@ namespace MidiBot.Views.DefaultForms
             sw.Start();
             RenderTimeDomain();
             sw.Stop();
-            Console.WriteLine(sw.ElapsedTicks);
-            
+            Console.WriteLine(sw.ElapsedMilliseconds);
         }
 
         public void RenderTimeDomain()
         {
-            // Set up for drawing
-            bmpWave = new Bitmap(pictureWave.Width, pictureWave.Height);
-            Graphics offScreenDC = Graphics.FromImage(bmpWave);
-            SolidBrush brush = new System.Drawing.SolidBrush(Color.FromArgb(0, 0, 0));
-            Pen pen = new System.Drawing.Pen(Color.WhiteSmoke);
-
+            g.Clear(pictureWave.BackColor);
             // Determine channnel boundries
             int width = bmpWave.Width;
             int center = bmpWave.Height / 2;
             int height = bmpWave.Height;
 
-            offScreenDC.DrawLine(pen, 0, center, width, center);
+            g.DrawLine(pen, 0, center, width, center);
 
             int leftLeft = 0;
             int leftTop = 0;
@@ -82,15 +81,12 @@ namespace MidiBot.Views.DefaultForms
                 }
                 else
                 {
-                    offScreenDC.DrawLine(pen, xPrevLeft, yPrevLeft, xAxis, yAxis);
+                    g.DrawLine(pen, xPrevLeft, yPrevLeft, xAxis, yAxis);
                     xPrevLeft = xAxis;
                     yPrevLeft = yAxis;
                 }
             }
-
-            // Clean up
             pictureWave.Image = bmpWave;
-            offScreenDC.Dispose();
         }
     }
 }
