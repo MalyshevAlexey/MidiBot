@@ -27,7 +27,7 @@ namespace MidiBot.AudioLib
 
         public WaveIn()
         {
-            DeviceNumber = 0;
+            DeviceNumber = 1;
             WaveFormat = new WaveFormat();
             BufferMilliseconds = 100;
             NumberOfBuffers = 3;
@@ -50,7 +50,7 @@ namespace MidiBot.AudioLib
 
         private void CreateBuffers()
         {
-            int bufferSize = BufferMilliseconds * WaveFormat.AverageBytesPerSecond / 1000;
+            int bufferSize = 4096; //BufferMilliseconds * WaveFormat.AverageBytesPerSecond / 1000;
             if (bufferSize % WaveFormat.BlockAlign != 0)
                 bufferSize -= bufferSize % WaveFormat.BlockAlign;
             buffers = new WaveInBuffer[NumberOfBuffers];

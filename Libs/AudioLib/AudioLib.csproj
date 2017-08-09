@@ -36,6 +36,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FFT.cs" />
     <Compile Include="IWaveIn.cs" />
     <Compile Include="SignalGenerator.cs" />
     <Compile Include="StoppedEventArgs.cs" />

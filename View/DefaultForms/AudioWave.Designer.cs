@@ -42,7 +42,7 @@
             this.pictureWave.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureWave.Location = new System.Drawing.Point(3, 3);
             this.pictureWave.Name = "pictureWave";
-            this.pictureWave.Size = new System.Drawing.Size(1261, 336);
+            this.pictureWave.Size = new System.Drawing.Size(878, 336);
             this.pictureWave.TabIndex = 0;
             this.pictureWave.TabStop = false;
             // 
@@ -52,7 +52,7 @@
             this.pictureFFT.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureFFT.Location = new System.Drawing.Point(3, 345);
             this.pictureFFT.Name = "pictureFFT";
-            this.pictureFFT.Size = new System.Drawing.Size(1261, 336);
+            this.pictureFFT.Size = new System.Drawing.Size(878, 336);
             this.pictureFFT.TabIndex = 0;
             this.pictureFFT.TabStop = false;
             // 
@@ -68,14 +68,14 @@
             this.table.RowCount = 2;
             this.table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.table.Size = new System.Drawing.Size(1267, 684);
+            this.table.Size = new System.Drawing.Size(884, 684);
             this.table.TabIndex = 1;
             // 
             // AudioWave
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1267, 684);
+            this.ClientSize = new System.Drawing.Size(884, 684);
             this.Controls.Add(this.table);
             this.Name = "AudioWave";
             this.Text = "AudioWave";
