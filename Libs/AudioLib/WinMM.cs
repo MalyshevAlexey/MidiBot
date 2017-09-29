@@ -42,11 +42,21 @@ namespace MidiBot.AudioLib
 
         // OUT
 
+        public const int WaveOutDone = 0x3BD;
+
         [DllImport(mmdll)]
         public static extern int waveOutGetNumDevs();
 
         [DllImport(mmdll)]
+        public static extern int waveOutGetDevCaps(IntPtr deviceID, ref WaveOutCaps waveOutCaps, int waveOutCapsSize);
+
+        [DllImport(mmdll)]
         public static extern int waveOutOpen(out IntPtr phwi, int deviceID, WaveFormat lpFormat, WaveCallback dwCallback, IntPtr dwInstance, int dwFlags);
 
+        [DllImport(mmdll)]
+        public static extern int waveOutPrepareHeader(IntPtr hWaveOut, WaveHeader lpWaveOutHdr, int uSize);
+
+        [DllImport(mmdll)]
+        public static extern int waveOutWrite(IntPtr hWaveOut, WaveHeader lpWaveOutHdr, int uSize);
     }
 }

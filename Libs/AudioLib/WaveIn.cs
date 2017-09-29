@@ -15,9 +15,10 @@ namespace MidiBot.AudioLib
         private WaveInBuffer[] buffers;
         private int lastReturnedBufferIndex;
         private readonly WinMM.WaveCallback callback;
-        private SignalGenerator signalGenerator;
+        public SignalGenerator signalGenerator;
         private Thread generatorThread;
 
+        public int bufferSize { get; private set; }
         public int DeviceNumber { get; set; }
         public int BufferMilliseconds { get; set; }
         public int NumberOfBuffers { get; set; }
@@ -27,7 +28,7 @@ namespace MidiBot.AudioLib
 
         public WaveIn()
         {
-            DeviceNumber = 1;
+            DeviceNumber = 0;
             WaveFormat = new WaveFormat();
             BufferMilliseconds = 100;
             NumberOfBuffers = 3;
@@ -50,7 +51,7 @@ namespace MidiBot.AudioLib
 
         private void CreateBuffers()
         {
-            int bufferSize = 4096; //BufferMilliseconds * WaveFormat.AverageBytesPerSecond / 1000;
+            bufferSize = 4096; //BufferMilliseconds * WaveFormat.AverageBytesPerSecond / 1000;
             if (bufferSize % WaveFormat.BlockAlign != 0)
                 bufferSize -= bufferSize % WaveFormat.BlockAlign;
             buffers = new WaveInBuffer[NumberOfBuffers];
@@ -94,6 +95,11 @@ namespace MidiBot.AudioLib
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public WaveInBuffer GetLastBuffer()
+        {
+            return buffers[lastReturnedBufferIndex];
         }
     }
 }

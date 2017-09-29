@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 namespace MidiBot.AudioLib
 {
-    public class WaveInBuffer
+    class WaveOutBuffer
     {
         private readonly WaveHeader header;
-        private readonly int bufferSize; // allocated bytes, may not be the same as bytes read
+        private readonly int bufferSize;
         private readonly byte[] buffer;
         private GCHandle hBuffer;
-        private IntPtr waveInHandle;
-        private GCHandle hHeader; // we need to pin the header structure
-        private GCHandle hThis; // for the user callback
+        private IntPtr waveOutHandle;
+        private GCHandle hHeader;
+        private GCHandle hThis;
 
         public byte[] Data
         {
@@ -35,13 +39,12 @@ namespace MidiBot.AudioLib
             }
         }
 
-        public WaveInBuffer(IntPtr WaveInHandle, int BufferSize)
+        public WaveOutBuffer(IntPtr WaveOutHandle, int BufferSize)
         {
+            waveOutHandle = WaveOutHandle;
             bufferSize = BufferSize;
             buffer = new byte[bufferSize];
             hBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            waveInHandle = WaveInHandle;
-
             header = new WaveHeader();
             hHeader = GCHandle.Alloc(header, GCHandleType.Pinned);
             header.dataBuffer = hBuffer.AddrOfPinnedObject();
@@ -49,14 +52,7 @@ namespace MidiBot.AudioLib
             header.loops = 1;
             hThis = GCHandle.Alloc(this);
             header.userData = (IntPtr)hThis;
-            WinMM.waveInPrepareHeader(waveInHandle, header, Marshal.SizeOf(header));
-        }
-
-        public void Use()
-        {
-            //WinMM.waveInUnprepareHeader(waveInHandle, header, Marshal.SizeOf(header));
-            
-            WinMM.waveInAddBuffer(waveInHandle, header, Marshal.SizeOf(header));
+            WinMM.waveOutPrepareHeader(waveOutHandle, header, Marshal.SizeOf(header));
         }
 
         public bool InQueue
@@ -65,6 +61,11 @@ namespace MidiBot.AudioLib
             {
                 return (header.flags & WaveHeaderFlags.InQueue) == WaveHeaderFlags.InQueue;
             }
+        }
+
+        internal void OnDone()
+        {
+            
         }
     }
 }

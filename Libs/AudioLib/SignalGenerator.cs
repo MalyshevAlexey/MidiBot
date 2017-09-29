@@ -2,7 +2,7 @@
 
 namespace MidiBot.AudioLib
 {
-    internal class SignalGenerator
+    public class SignalGenerator
     {
         private WaveFormat WaveFormat { get; set; }
 
@@ -10,10 +10,10 @@ namespace MidiBot.AudioLib
         {
             WaveFormat = waveFormat;
         }
-        public double[] GenerateSignal()
+        public double[] GenerateSignal(double frq)
         {
-            int _samples = 16384;
-            double _frequency = 5000.0;
+            int _samples = 4096;
+            double _frequency = frq;
             double _amplitude = 32768.0;
             double[] values = new double[_samples];
             double theta = 2.0 * Math.PI * _frequency / WaveFormat.SampleRate;

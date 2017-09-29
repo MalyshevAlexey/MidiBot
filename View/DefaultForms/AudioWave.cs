@@ -19,6 +19,7 @@ namespace MidiBot.Views.DefaultForms
         Graphics g;
         Pen pen;
         WaveIn wi;
+        WaveOut wo;
         double[] waveLeft;
         double[] waveRight;
         double[] fftLeft;
@@ -31,7 +32,9 @@ namespace MidiBot.Views.DefaultForms
             pen = new System.Drawing.Pen(Color.WhiteSmoke);
             wi = new WaveIn();
             wi.DataAvailable += new EventHandler<WaveInEventArgs>(DataAvailable);
+            wo = new WaveOut(wi);
             wi.StartRecording();
+            wo.StartPlayback();
         }
 
         void DataAvailable(object sender, WaveInEventArgs e)
@@ -41,12 +44,14 @@ namespace MidiBot.Views.DefaultForms
             waveLeft = new double[e.Buffer.Length / 2];
             for (int i = 0; i < waveLeft.Length; i++)
                 waveLeft[i] = BitConverter.ToInt16(e.Buffer, i * 2);
+            //if (trackBar.InvokeRequired) trackBar.Invoke ((MethodInvoker) delegate { waveLeft = wi.signalGenerator.GenerateSignal(trackBar.Value); label.Text = trackBar.Value.ToString(); });
+
             fftLeft = FFT.FFTDb(ref waveLeft);
             
             RenderFrequencyDomain();
             RenderTimeDomain();
             sw.Stop();
-            Console.WriteLine(sw.ElapsedTicks + " " + sw.ElapsedMilliseconds);
+            //Console.WriteLine(sw.ElapsedTicks + " " + sw.Elapsed.TotalMilliseconds + " ");
         }
 
         public void RenderTimeDomain()
@@ -117,9 +122,9 @@ namespace MidiBot.Views.DefaultForms
                 double amplitude = (int)fftLeft[(int)(((double)(fftLeft.Length) / (double)(width)) * xAxis)];
                 if (amplitude < 0) // Drop negative values
                     amplitude = 0;
-                int yAxis = (int)(leftTop + ((leftBottom - leftTop) * amplitude) / 100);  // Arbitrary factor
+                int yAxis = (int)(leftBottom - ((leftBottom - leftTop) * amplitude) / 100);  // Arbitrary factor
                 pen.Color = Color.FromArgb(0, 0, (int)amplitude % 255);
-                offScreenDC.DrawLine(pen, xAxis, leftTop, xAxis, yAxis);
+                offScreenDC.DrawLine(pen, xAxis, leftBottom, xAxis, yAxis);
             }
 
             // Clean up

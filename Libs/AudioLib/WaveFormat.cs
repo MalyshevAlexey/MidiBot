@@ -9,8 +9,12 @@ namespace MidiBot.AudioLib
 {
     public enum WaveFormats
     {
+        Unknown = 0,
         Pcm = 1,
-        Float = 3
+        Adpcm = 2,
+        Float = 3,
+        alaw = 6,
+        mulaw = 7
     }
     [StructLayout(LayoutKind.Sequential)]
     public class WaveFormat

@@ -47,6 +47,9 @@
     <Compile Include="WaveInBuffer.cs" />
     <Compile Include="WaveInCaps.cs" />
     <Compile Include="WaveInEventArgs.cs" />
+    <Compile Include="WaveOut.cs" />
+    <Compile Include="WaveOutBuffer.cs" />
+    <Compile Include="WaveOutCaps.cs" />
     <Compile Include="WinMM.cs" />
   </ItemGroup>
   <ItemGroup>
